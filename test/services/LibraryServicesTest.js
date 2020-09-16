@@ -3,6 +3,7 @@
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../../src/models");
+const Author = db.Author;
 const Library = db.Library;
 const LibraryServices = require("../../src/services/LibraryServices");
 const BadRequest = require("../../src/util/BadRequest");
@@ -15,6 +16,44 @@ const expect = chai.expect;
 
 // Test Data -----------------------------------------------------------------
 
+// Must be seeded with valid libraryId
+const authorsData0 = {
+    author0Data: {
+        firstName: "Barney",
+        lastName: "Rubble",
+        notes: "Barney Author"
+    },
+    author1Data: {
+        firstName: "Betty",
+        lastName: "Rubble",
+        notes: "Betty Author"
+    },
+    author2Data: {
+        firstName: "Bam Bam",
+        lastName: "Rubble",
+        notes: "Bam Bam Author"
+    }
+}
+
+// Must be seeded with valid libraryId
+const authorsData1 = {
+    author0Data: {
+        firstName: "Fred",
+        lastName: "Flintstone",
+        notes: "Fred Author"
+    },
+    author1Data: {
+        firstName: "Wilma",
+        lastName: "Flintstone",
+        notes: "Wilma Author"
+    },
+    author2Data: {
+        firstName: "Pebbles",
+        lastName: "Flintstone",
+        notes: "Pebbles Author"
+    }
+}
+
 const librariesData = {
     library0Data: {
         name: "First Library",
@@ -26,6 +65,26 @@ const librariesData = {
     },
     library2Data: {
         name: "Third Library"
+    }
+}
+
+// Returns array of created Author objects
+const loadAuthors = async (library, authorsData) => {
+    let data = [
+        authorsData.author0Data,
+        authorsData.author1Data,
+        authorsData.author2Data
+    ]
+    data.forEach(datum => {
+        datum.libraryId = library.id
+    });
+    try {
+        return await Author.bulkCreate(data, {
+            validate: true
+        });
+    } catch (err) {
+        console.error("loadAuthors() error: ", err);
+        throw err;
     }
 }
 
@@ -77,6 +136,41 @@ describe("LibraryServices Tests", () => {
 
                 let results = await LibraryServices.all();
                 expect(results.length).to.equal(3);
+
+            })
+
+            it("should find all objects with includes", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[1].dataValues;
+                await loadAuthors(libraryMatch, authorsData0);
+
+                let results = await LibraryServices.all({
+                    withAuthors: ""
+                });
+                expect(results.length).to.equal(3);
+                results.forEach(library => {
+                    if (library.authors) {
+                        if (library.id === libraryMatch.id) {
+                            expect(library.authors.length).to.equal(3);
+                        } else {
+                            expect(library.authors.length).to.equal(0);
+                        }
+                    } else {
+                        expect.fail("Should have included authors");
+                    }
+                })
+
+            })
+
+            it("should find some objects with pagination", async () => {
+
+                let libraries = await loadLibraries();
+
+                let results = await LibraryServices.all({
+                    offset: 1
+                });
+                expect(results.length).to.equal(2);
 
             })
 

@@ -148,6 +148,39 @@ describe("AuthorServices Tests", () => {
 
             })
 
+            it("should find all objects with includes", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[1].dataValues;
+                await loadAuthors(libraryMatch, authorsData0);
+
+                let results = await AuthorServices.all({
+                    withLibrary: ""
+                });
+                expect(results.length).to.equal(3);
+                results.forEach(author => {
+                    if (author.library) {
+                        expect(author.library.id).to.equal(libraryMatch.id);
+                    } else {
+                        expect.fail("Should have included library");
+                    }
+                })
+
+            })
+
+            it("should find some objects with pagination", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                await loadAuthors(libraryMatch, authorsData0);
+
+                let results = await AuthorServices.all({
+                    offset: 1
+                });
+                expect(results.length).to.equal(2);
+
+            })
+
         });
 
         context("no objects", () => {

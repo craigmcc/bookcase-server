@@ -25,17 +25,69 @@ const order = [
 
 const Op = db.Sequelize.Op;
 
-// Standard CRUD Methods -----------------------------------------------------
+// Private Methods -----------------------------------------------------------
 
-exports.all = async () => {
-    let conditions = {
-        order: order
+let appendQueryParameters = (options, queryParameters) => {
+
+    if (!queryParameters) {
+        return options;
     }
-    return await Author.findAll(conditions);
+
+    // Pagination parameters
+    if (queryParameters["limit"]) {
+        let value = parseInt(queryParameters.limit, 10);
+        if (isNaN(value)) {
+            throw new Error(`${queryParameters.limit} is not a number`);
+        } else {
+            options["limit"] = value;
+        }
+    }
+    if (queryParameters["offset"]) {
+        let value = parseInt(queryParameters.offset, 10);
+        if (isNaN(value)) {
+            throw new Error(`${queryParameters.offset} is not a number`);
+        } else {
+            options["offset"] = value;
+        }
+    }
+
+    // Inclusion parameters
+    let include = [];
+    if ("" === queryParameters["withLibrary"]) {
+        include.push(Library);
+    }
+    /*
+        if ("" === queryParameters["withSeries"]) {
+            include.push(Series);
+        }
+        if ("" === queryParameters["withStories"]) {
+            include.push(Story);
+        }
+        if ("" === queryParameters["withVolumes"]) {
+            include.push(Volume);
+        }
+    */
+    if (include.length > 0) {
+        options["include"] = include;
+    }
+
+    // Return result
+    return options;
+
 }
 
-exports.find = async (id) => {
-    let result = await Author.findByPk(id);
+// Standard CRUD Methods -----------------------------------------------------
+
+exports.all = async (queryParameters) => {
+    let options = appendQueryParameters({
+        order: order
+    }, queryParameters);
+    return await Author.findAll(options);
+}
+
+exports.find = async (id, queryParameters) => {
+    let options = appendQueryParameters({}, queryParameters);
+    let result = await Author.findByPk(id, options);
     if (!result) {
         throw new NotFound(`id: Missing Author ${id}`);
     } else {
@@ -112,45 +164,45 @@ exports.update = async (id, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
-exports.authorAll = async (libraryId) => {
+exports.authorAll = async (libraryId, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
-    let conditions = {
+    let options = appendQueryParameters({
         order: order,
         where: {
-            libraryId : libraryId
+            libraryId: libraryId
         }
-    }
-    return await Author.findAll(conditions);
+    }, queryParameters);
+    return await Author.findAll(options);
 }
 
-exports.authorExact = async (libraryId, firstName, lastName) => {
+exports.authorExact = async (libraryId, firstName, lastName, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
-    let conditions = {
+    let options = appendQueryParameters({
         where: {
             firstName: firstName,
             lastName: lastName,
             libraryId: libraryId,
         }
-    }
-    let results = await Author.findAll(conditions);
+    }, queryParameters);
+    let results = await Author.findAll(options);
     if (results.length !== 1) {
         throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
     }
     return results[0];
 }
 
-exports.authorName = async (libraryId, name) => {
+exports.authorName = async (libraryId, name, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
-    let conditions = {
+    let options = appendQueryParameters({
         order: order,
         where: {
             libraryId: libraryId,
@@ -159,6 +211,6 @@ exports.authorName = async (libraryId, name) => {
                 lastName: {[Op.iLike]: `%${name}%`}
             }
         }
-    }
-    return await Author.findAll(conditions);
+    }, queryParameters);
+    return await Author.findAll(options);
 }

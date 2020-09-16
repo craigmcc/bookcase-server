@@ -21,7 +21,7 @@ module.exports = (app) => {
     // GET /exact/:name - Find Library by exact name
     router.get("/exact/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.exact(req.params.name));
+            res.send(await LibraryServices.exact(req.params.name, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -35,7 +35,7 @@ module.exports = (app) => {
     // GET /name/:name - Find Library objects by name segment match
     router.get("/name/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.name(req.params.name));
+            res.send(await LibraryServices.name(req.params.name, req.query));
         } catch (err) {
             console.error("LibraryRouters.name() error: ", err);
             res.status(500).send(err.message);
@@ -47,7 +47,7 @@ module.exports = (app) => {
     // GET / - Find all Library objects
     router.get("/", async (req, res) => {
         try {
-            res.send(await LibraryServices.all());
+            res.send(await LibraryServices.all(req.query));
         } catch (err) {
             console.error("LibraryRouters.all() error: ", err);
             res.status(500).send(err.message);
@@ -89,7 +89,7 @@ module.exports = (app) => {
     // GET /:id - Find Library by ID
     router.get("/:id", async (req, res) => {
         try {
-            res.send(await LibraryServices.find(req.params.id));
+            res.send(await LibraryServices.find(req.params.id, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -123,7 +123,7 @@ module.exports = (app) => {
     // GET /:id/authors - Find Authors by Library ID
     router.get("/:id/authors", async (req, res) => {
         try {
-            res.send(await AuthorServices.authorAll(req.params.id));
+            res.send(await AuthorServices.authorAll(req.params.id, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -139,7 +139,7 @@ module.exports = (app) => {
     router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
         try {
             res.send(await AuthorServices.authorExact
-                (req.params.id, req.params.firstName, req.params.lastName));
+                (req.params.id, req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -155,7 +155,7 @@ module.exports = (app) => {
     router.get("/:id/authors/name/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.authorName
-                (req.params.id, req.params.name));
+                (req.params.id, req.params.name, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
