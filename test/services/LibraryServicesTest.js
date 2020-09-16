@@ -36,10 +36,14 @@ const loadLibraries = async () => {
         librariesData.library1Data,
         librariesData.library2Data
     ]
-    return await Library.bulkCreate(data, {
-        validate: true
-    });
-
+    try {
+        return await Library.bulkCreate(data, {
+            validate: true
+        });
+    } catch (err) {
+        console.error("loadLibraries() error: ", err);
+        throw err;
+    }
 }
 
 // LibraryServices Tests -----------------------------------------------------
@@ -188,7 +192,7 @@ describe("LibraryServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}`);
                     }
                     expect(err.message)
-                        .include(`name: Name '${duplicateNameLibrary.name}' is already in use`);
+                        .includes(`name: Name '${duplicateNameLibrary.name}' is already in use`);
                 }
 
             });
@@ -206,7 +210,7 @@ describe("LibraryServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .include("library.name cannot be null");
+                        .includes("library.name cannot be null");
                 }
 
             });

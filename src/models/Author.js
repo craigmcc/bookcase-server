@@ -22,7 +22,6 @@ module.exports = (sequelize) => {
             field: "firstname",
             type: DataTypes.STRING,
             unique: "uniqueNameWithinLibrary",
-            validate: { } // TODO - field level validations
         },
 
         lastName: {
@@ -30,7 +29,6 @@ module.exports = (sequelize) => {
             field: "lastname",
             type: DataTypes.STRING,
             unique: "uniqueNameWithinLibrary",
-            validate: { } // TODO - field level validations
         },
 
         libraryId: {
@@ -38,7 +36,19 @@ module.exports = (sequelize) => {
             field: "libraryid",
             type: DataTypes.INTEGER,
             unique: "uniqueNameWithinLibrary",
-            validate: { } // TODO - field level validations
+            validate: {
+                isValidLibraryId: function (value, next) {
+                    Library.findByPk(value)
+                        .then(library => {
+                            if (library) {
+                                next();
+                            } else {
+                                next(`libraryId: Missing Library ${value}`);
+                            }
+                        })
+                        .catch(next);
+                }
+            }
         },
 
         notes: {
@@ -53,7 +63,30 @@ module.exports = (sequelize) => {
         tableName: "author",
         timestamps: true,
         updatedAt: "updated",
-        validate: { }, // TODO - class level validations
+        validate: {
+            isNameUniqueWithinLibrary: function(next) {
+                let conditions = {
+                    where: {
+                        firstName: this.firstName,
+                        lastName: this.lastName,
+                        libraryId: this.libraryId,
+                    }
+                };
+                if (this.id) {
+                    conditions.where["id"] = { [Op.ne]: this.id };
+                }
+                Author.count(conditions)
+                    .then(found => {
+                        return (found !== 0)
+                            ? next(
+                                `name: Name '${this.firstName} ${this.lastName}' ` +
+                                "is already in use within this Library")
+                            : next();
+                    })
+                    .catch(next);
+            }
+
+        },
         version: true,
 
         sequelize

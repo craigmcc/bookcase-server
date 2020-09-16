@@ -65,13 +65,13 @@ module.exports = (sequelize) => {
 
     Library.associate = (models) => {
 
-/*
         models.Library.hasMany(models.Author);
 
-        models.Library.hasMany(models.Series);
+        /*
+                models.Library.hasMany(models.Series);
 
-        models.Library.hasMany(models.Volume);
-*/
+                models.Library.hasMany(models.Volume);
+        */
 
     }
 
