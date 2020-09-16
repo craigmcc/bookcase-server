@@ -4,7 +4,7 @@
 
 // External Modules ----------------------------------------------------------
 
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Op } = require("sequelize");
 
 module.exports = (sequelize) => {
 
@@ -21,7 +21,25 @@ module.exports = (sequelize) => {
             allowNull: false,
             type: DataTypes.STRING,
             unique: true,
-            validate: { } // TODO - field level validations
+            validate: {
+                isUnique: function(value, next) {
+                    let conditions = {
+                        where: {
+                            name: value
+                        }
+                    };
+                    if (this.id) {
+                        conditions.where["id"] = { [Op.ne]: this.id };
+                    }
+                    Library.count(conditions)
+                        .then(found => {
+                            return (found !== 0)
+                                ? next(`name: Name '${value}' is already in use`)
+                                : next();
+                        })
+                        .catch(next);
+                }
+            }
         },
 
         notes: {

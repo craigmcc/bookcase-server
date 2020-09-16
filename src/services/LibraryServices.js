@@ -15,6 +15,8 @@ const fieldsWithId = [...fields, "id"];
 
 // External Modules ----------------------------------------------------------
 
+const Op = db.Sequelize.Op;
+
 // Standard CRUD Methods -----------------------------------------------------
 
 exports.all = async () => {
@@ -76,8 +78,7 @@ exports.update = async (id, data) => {
     }
     let transaction;
     try {
-        transaction = db.sequelize.transaction();
-        data.id = id;
+        transaction = await db.sequelize.transaction();
         let result = await Library.update(data, {
             fields: fieldsWithId,
             transaction: transaction,
@@ -88,7 +89,7 @@ exports.update = async (id, data) => {
         }
         await transaction.commit();
         transaction = null;
-        return Library.findByPk(id);
+        return await Library.findByPk(id);
     } catch (err) {
         if (transaction) {
             await transaction.rollback();
@@ -112,4 +113,14 @@ exports.exact = async (name) => {
         throw new NotFound(`name: Missing Library '${name}'`);
     }
     return results[0];
+}
+
+exports.name = async (name) => {
+    let conditions = {
+        order: [ ["name", "ASC"] ],
+        where: {
+            name: { [Op.iLike]: `%${name}%` }
+        }
+    }
+    return await Library.findAll(conditions);
 }
