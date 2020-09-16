@@ -3,7 +3,7 @@
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../models");
-const Library = db.Library;
+const AuthorServices = require("../services/AuthorServices");
 const LibraryServices = require("../services/LibraryServices");
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
@@ -16,7 +16,7 @@ const router = require("express").Router();
 
 module.exports = (app) => {
 
-    // Model Specific Endpoints ----------------------------------------------
+    // Model Specific Endpoints (no :id) -------------------------------------
 
     // GET /exact/:name - Find Library by exact name
     router.get("/exact/:name", async (req, res) => {
@@ -113,6 +113,54 @@ module.exports = (app) => {
                 res.status(404).send(err.message);
             } else {
                 console.error("LibraryRouters.update() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // Model Specific Endpoints (with :id) -----------------------------------
+
+    // GET /:id/authors - Find Authors by Library ID
+    router.get("/:id/authors", async (req, res) => {
+        try {
+            res.send(await AuthorServices.authorAll(req.params.id));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.authorAll() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // GET /:id/authors/exact/:firstName/:lastName
+    //   - Find Author by Library ID and exact names
+    router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
+        try {
+            res.send(await AuthorServices.authorExact
+                (req.params.id, req.params.firstName, req.params.lastName));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.authorExact() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+
+    // GET /:id/authors/name/:name - Find Authors by Library ID and name segment
+    router.get("/:id/authors/name/:name", async (req, res) => {
+        try {
+            res.send(await AuthorServices.authorName
+                (req.params.id, req.params.name));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.authorName() error: ", err);
                 res.status(500).send(err.message);
             }
         }

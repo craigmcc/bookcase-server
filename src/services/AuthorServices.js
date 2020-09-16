@@ -4,6 +4,7 @@
 
 const db = require("../models");
 const Author = db.Author;
+const Library = db.Library;
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
@@ -111,7 +112,25 @@ exports.update = async (id, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
-exports.exact = async (libraryId, firstName, lastName) => {
+exports.authorAll = async (libraryId) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
+    let conditions = {
+        order: order,
+        where: {
+            libraryId : libraryId
+        }
+    }
+    return await Author.findAll(conditions);
+}
+
+exports.authorExact = async (libraryId, firstName, lastName) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
     let conditions = {
         where: {
             firstName: firstName,
@@ -126,7 +145,11 @@ exports.exact = async (libraryId, firstName, lastName) => {
     return results[0];
 }
 
-exports.name = async (libraryId, name) => {
+exports.authorName = async (libraryId, name) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
     let conditions = {
         order: order,
         where: {
