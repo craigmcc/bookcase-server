@@ -153,7 +153,7 @@ exports.authorName = async (libraryId, name) => {
     let conditions = {
         order: order,
         where: {
-            facilityId: facilityId,
+            libraryId: libraryId,
             [Op.or]: {
                 firstName: {[Op.iLike]: `%${name}%`},
                 lastName: {[Op.iLike]: `%${name}%`}

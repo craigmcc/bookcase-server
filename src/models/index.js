@@ -25,7 +25,7 @@ const sequelize = (process.env.NODE_ENV === "production")
     })
     : new Sequelize('database', 'username', 'password', {
         dialect: 'sqlite',
-//    logging: console.log,
+//    logging: console.info,
         logging: false,
         storage: './test/database.sqlite'
     })
@@ -37,7 +37,8 @@ db.sequelize = sequelize;
 
 // db.sequelize.sync();
 db.sequelize.sync({
-    force: true
+    force: true,
+    logging: false
 }).then(() => {
     console.log("Dropped and resynchronized database tables");
 })

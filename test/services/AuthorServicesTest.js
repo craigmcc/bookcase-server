@@ -109,6 +109,8 @@ const loadLibraries = async () => {
 
 describe("AuthorServices Tests", () => {
 
+    // Test Hooks ------------------------------------------------------------
+
     before("#init", async () => {
         await Library.sync({
             force: true
