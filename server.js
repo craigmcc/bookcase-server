@@ -33,7 +33,9 @@ app.get("/", (req, res) => {
 });
 
 // TODO - Configure Routers
+require("./src/routers/AuthorRouters")(app);
 require("./src/routers/LibraryRouters")(app);
+require("./src/routers/SeriesRouters")(app);
 
 // Start Server --------------------------------------------------------------
 
@@ -42,4 +44,3 @@ let PORT = process.env.PORT || 8084;
 app.listen(PORT, () => {
     console.info(`Server is running on port ${PORT}`);
 });
-

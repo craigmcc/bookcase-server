@@ -3,23 +3,22 @@
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../models");
-const Author = db.Author;
+const Author = db.Library;
 const Library = db.Library;
 const Series = db.Series;
+
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
 const fields = [
-    "firstName",
-    "lastName",
     "libraryId",
+    "name",
     "notes"
 ];
 const fieldsWithId = [...fields, "id"];
 const order = [
     ["libraryId", "ASC"],
-    ["lastName", "ASC"],
-    ["firstName", "ASC"]
+    ["name", "ASC"]
 ];
 
 // External Modules ----------------------------------------------------------
@@ -54,20 +53,17 @@ let appendQueryParameters = (options, queryParameters) => {
 
     // Inclusion parameters
     let include = [];
+    if ("" === queryParameters["withAuthors"]) {
+        include.push(Author);
+    }
     if ("" === queryParameters["withLibrary"]) {
         include.push(Library);
     }
-    if ("" === queryParameters["withSeries"]) {
-        include.push(Series);
-    }
-/*
+    /*
         if ("" === queryParameters["withStories"]) {
             include.push(Story);
         }
-        if ("" === queryParameters["withVolumes"]) {
-            include.push(Volume);
-        }
-*/
+    */
     if (include.length > 0) {
         options["include"] = include;
     }
@@ -83,14 +79,14 @@ exports.all = async (queryParameters) => {
     let options = appendQueryParameters({
         order: order
     }, queryParameters);
-    return await Author.findAll(options);
+    return await Series.findAll(options);
 }
 
 exports.find = async (id, queryParameters) => {
     let options = appendQueryParameters({}, queryParameters);
-    let result = await Author.findByPk(id, options);
+    let result = await Series.findByPk(id, options);
     if (!result) {
-        throw new NotFound(`id: Missing Author ${id}`);
+        throw new NotFound(`id: Missing Series ${id}`);
     } else {
         return result;
     }
@@ -100,7 +96,7 @@ exports.insert = async (data) => {
     let transaction;
     try {
         transaction = await db.sequelize.transaction();
-        let result = await Author.create(data, {
+        let result = await Series.create(data, {
             fields: fields,
             transaction: transaction
         });
@@ -119,38 +115,38 @@ exports.insert = async (data) => {
 }
 
 exports.remove = async (id) => {
-    let result = await Author.findByPk(id);
+    let result = await Series.findByPk(id);
     if (!result) {
-        throw new NotFound(`id: Missing Author ${id}`);
+        throw new NotFound(`id: Missing Series ${id}`);
     }
-    let num = await Author.destroy({
+    let num = await Series.destroy({
         where: { id: id }
     });
     if (num !== 1) {
-        throw new NotFound(`id: Cannot remove Author ${id}`);
+        throw new NotFound(`id: Cannot remove Series ${id}`);
     }
     return result;
 }
 
 exports.update = async (id, data) => {
-    let original = await Author.findByPk(id);
+    let original = await Series.findByPk(id);
     if (!original) {
-        throw new NotFound(`id: Missing Author ${id}`);
+        throw new NotFound(`id: Missing Series ${id}`);
     }
     let transaction;
     try {
         transaction = await db.sequelize.transaction();
-        let result = await Author.update(data, {
+        let result = await Series.update(data, {
             fields: fieldsWithId,
             transaction: transaction,
             where: { id: id }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`id: Cannot update Author ${id}`);
+            throw new BadRequest(`id: Cannot update Series ${id}`);
         }
         await transaction.commit();
         transaction = null;
-        return await Author.findByPk(id);
+        return await Series.findByPk(id);
     } catch (err) {
         if (transaction) {
             await transaction.rollback();
@@ -165,7 +161,7 @@ exports.update = async (id, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
-exports.authorAll = async (libraryId, queryParameters) => {
+exports.seriesAll = async (libraryId, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
@@ -176,29 +172,28 @@ exports.authorAll = async (libraryId, queryParameters) => {
             libraryId: libraryId
         }
     }, queryParameters);
-    return await Author.findAll(options);
+    return await Series.findAll(options);
 }
 
-exports.authorExact = async (libraryId, firstName, lastName, queryParameters) => {
+exports.seriesExact = async (libraryId, name, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         where: {
-            firstName: firstName,
-            lastName: lastName,
             libraryId: libraryId,
+            name: name,
         }
     }, queryParameters);
-    let results = await Author.findAll(options);
+    let results = await Series.findAll(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
+        throw new NotFound(`name: Missing Series '${name}'`);
     }
     return results[0];
 }
 
-exports.authorName = async (libraryId, name, queryParameters) => {
+exports.seriesName = async (libraryId, name, queryParameters) => {
     let library = await Library.findByPk(libraryId);
     if (!library) {
         throw new NotFound(`libraryId: Missing Library ${libraryId}`);
@@ -207,11 +202,8 @@ exports.authorName = async (libraryId, name, queryParameters) => {
         order: order,
         where: {
             libraryId: libraryId,
-            [Op.or]: {
-                firstName: {[Op.iLike]: `%${name}%`},
-                lastName: {[Op.iLike]: `%${name}%`}
-            }
+            name: { [Op.iLike]: `%${name}%`},
         }
     }, queryParameters);
-    return await Author.findAll(options);
+    return await Series.findAll(options);
 }

@@ -1,9 +1,9 @@
-"use strict"
+"use strict";
 
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../models");
-const AuthorServices = require("../services/AuthorServices");
+const SeriesServices = require("../services/SeriesServices");
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
@@ -15,22 +15,20 @@ const router = require("express").Router();
 
 module.exports = (app) => {
 
-    // Standard CRUD Endpoints -----------------------------------------------
-
-    // GET / - Find all Author objects
+    // GET / - Find all Series objects
     router.get("/", async (req, res) => {
         try {
-            res.send(await AuthorServices.all(req.query));
+            res.send(await SeriesServices.all(req.query));
         } catch (err) {
-            console.error("AuthorRouters.all() error: ", err);
+            console.error("SeriesRouters.all() error: ", err);
             res.status(500).send(err.message);
         }
     })
 
-    // POST / - Insert a new Author
+    // POST / - Insert a new Series
     router.post("/", async (req, res) => {
         try {
-            res.send(await AuthorServices.insert(req.body));
+            res.send(await SeriesServices.insert(req.body));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
                 res.status(404).send(err.message);
@@ -39,44 +37,44 @@ module.exports = (app) => {
             } else if (err instanceof NotFound) {
                 res.status(404).send(err.message);
             } else {
-                console.error("AuthorRouters.insert() error: ", err);
+                console.error("SeriesRouters.insert() error: ", err);
                 res.status(500).send(err.message);
             }
         }
     })
 
-    // DELETE /:id - Remove Author by ID
+    // DELETE /:id - Remove Series by ID
     router.delete("/:id", async (req, res) => {
         try {
-            res.send(await AuthorServices.remove(req.params.id));
+            res.send(await SeriesServices.remove(req.params.id));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
             } else {
-                console.error("AuthorRouters.remove() error: ", err);
+                console.error("SeriesRouters.remove() error: ", err);
                 res.status(500).send(err.message);
             }
         }
     })
 
-    // GET /:id - Find Author by ID
+    // GET /:id - Find Series by ID
     router.get("/:id", async (req, res) => {
         try {
-            res.send(await AuthorServices.find(req.params.id, req.query));
+            res.send(await SeriesServices.find(req.params.id, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
             } else {
-                console.error("AuthorRouters.find() error: ", err);
+                console.error("SeriesRouters.find() error: ", err);
                 res.status(500).send(err.message);
             }
         }
     })
 
-    // PUT /:id - Update Author by ID
+    // PUT /:id - Update Series by ID
     router.put("/:id", async (req, res) => {
         try {
-            res.send(await AuthorServices.update(req.params.id));
+            res.send(await SeriesServices.update(req.params.id));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
                 res.status(404).send(err.message);
@@ -85,7 +83,7 @@ module.exports = (app) => {
             } else if (err instanceof NotFound) {
                 res.status(404).send(err.message);
             } else {
-                console.error("AuthorRouters.update() error: ", err);
+                console.error("SeriesRouters.update() error: ", err);
                 res.status(500).send(err.message);
             }
         }
@@ -93,6 +91,8 @@ module.exports = (app) => {
 
     // Export Routes ---------------------------------------------------------
 
-    app.use("/api/authors", router);
+    app.use("/api/series", router);
+
+
 
 }

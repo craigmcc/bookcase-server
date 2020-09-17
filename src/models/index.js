@@ -46,12 +46,16 @@ db.sequelize.sync({
 // Configure Models ----------------------------------------------------------
 
 db.Author = require("./Author")(sequelize);
+db.AuthorSeries = require("./AuthorSeries")(sequelize);
 db.Library = require("./Library")(sequelize);
+db.Series = require("./Series")(sequelize);
 
 // Configure Associations ----------------------------------------------------
 
 db.Author.associate(db);
+db.AuthorSeries.associate(db);
 db.Library.associate(db);
+db.Series.associate(db);
 
 // Export Database Interface -------------------------------------------------
 

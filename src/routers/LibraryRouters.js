@@ -166,6 +166,51 @@ module.exports = (app) => {
         }
     })
 
+    // GET /:id/series - Find Series by Library ID
+    router.get("/:id/series", async (req, res) => {
+        try {
+            res.send(await SeriesServices.seriesAll(req.params.id, req.query));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.seriesAll() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // GET /:id/series/exact/:name - Find Series by Library ID and exact name
+    router.get("/:id/series/exact/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.seriesExact
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.seriesExact() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+
+    // GET /:id/series/name/:name - Find Series by Library ID and name segment
+    router.get("/:id/series/name/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.seriesName
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("LibraryRouters.seriesName() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
     // Export Routes ---------------------------------------------------------
 
     app.use("/api/libraries", router);

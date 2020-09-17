@@ -2,6 +2,9 @@
 
 // Internal Modules ----------------------------------------------------------
 
+let Author;    // Filled in by associate()
+let Series;    // Filled in by associate()
+
 // External Modules ----------------------------------------------------------
 
 const { DataTypes, Model, Op } = require("sequelize");
@@ -15,7 +18,12 @@ module.exports = (sequelize) => {
 
     Library.init({
 
-        // TODO - has many authors;
+        id: {
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true,
+            type: DataTypes.BIGINT
+        },
 
         name: {
             allowNull: false,
@@ -65,13 +73,14 @@ module.exports = (sequelize) => {
 
     Library.associate = (models) => {
 
-        models.Library.hasMany(models.Author);
+        Author = models.Author;
+        Series = models.Series;
 
-        /*
-                models.Library.hasMany(models.Series);
+        Library.hasMany(Author);
 
-                models.Library.hasMany(models.Volume);
-        */
+        Library.hasMany(Series);
+
+//        Library.hasMany(Volume);
 
     }
 

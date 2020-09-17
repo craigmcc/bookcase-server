@@ -2,7 +2,9 @@
 
 // Internal Modules ----------------------------------------------------------
 
-let Library; // Filled in by associate()
+let AuthorSeries; // Filled in by associate()
+let Library;      // Filled in by associate()
+let Series;       // Filled in by associate()
 
 // External Modules ----------------------------------------------------------
 
@@ -16,6 +18,13 @@ module.exports = (sequelize) => {
     }
 
     Author.init({
+
+        id: {
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true,
+            type: DataTypes.BIGINT
+        },
 
         firstName: {
             allowNull: false,
@@ -34,7 +43,7 @@ module.exports = (sequelize) => {
         libraryId: {
             allowNull: false,
             field: "libraryid",
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             unique: "uniqueNameWithinLibrary",
             validate: {
                 isValidLibraryId: function (value, next) {
@@ -97,19 +106,22 @@ module.exports = (sequelize) => {
 
     Author.associate = (models) => {
 
-//        models.Author.belongsToMany(models.Series, { through: AuthorSeries });
-
+        AuthorSeries = models.AuthorSeries;
         Library = models.Library;
-        models.Author.belongsTo(models.Library, {
+        Series = models.Series;
+
+        Author.belongsToMany(Series, { through: AuthorSeries });
+
+        Author.belongsTo(Library, {
             onDelete: "CASCADE",
             foreignKey: {
                 allowNull: false
             }
         });
 
-//        models.Author.belongsToMany(models.Story, { through: AuthorStory });
+//        models.Author.belongsToMany(Story, { through: AuthorStory });
 
-//        models.Author.belongsToMany(models.Volume, { through: AuthorVolume });
+//        models.Author.belongsToMany(Volume, { through: AuthorVolume });
 
     }
 
