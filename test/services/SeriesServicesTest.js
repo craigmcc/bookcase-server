@@ -365,7 +365,7 @@ describe("SeriesServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("series.name cannot be null");
+                        .includes("name: Is required");
                 }
 
             });
@@ -386,7 +386,7 @@ describe("SeriesServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("series.libraryId cannot be null");
+                        .includes("libraryId: Is required");
                 }
 
             });

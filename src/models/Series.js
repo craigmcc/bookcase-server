@@ -42,6 +42,9 @@ module.exports = (sequelize) => {
                             }
                         })
                         .catch(next);
+                },
+                notNull: {
+                    msg: "libraryId: Is required"
                 }
             }
         },
@@ -50,6 +53,11 @@ module.exports = (sequelize) => {
             allowNull: false,
             type: DataTypes.STRING,
             unique: "uniqueNameWithinLibrary",
+            validate: {
+                notNull: {
+                    msg: "name: Is required"
+                }
+            }
         },
 
         notes: {

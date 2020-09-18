@@ -46,6 +46,9 @@ module.exports = (sequelize) => {
                                 : next();
                         })
                         .catch(next);
+                },
+                notNull: {
+                    msg: "name: Is required"
                 }
             }
         },

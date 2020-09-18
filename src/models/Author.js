@@ -31,6 +31,11 @@ module.exports = (sequelize) => {
             field: "firstname",
             type: DataTypes.STRING,
             unique: "uniqueNameWithinLibrary",
+            validate: {
+                notNull: {
+                    msg: "firstName: Is required"
+                }
+            }
         },
 
         lastName: {
@@ -38,6 +43,11 @@ module.exports = (sequelize) => {
             field: "lastname",
             type: DataTypes.STRING,
             unique: "uniqueNameWithinLibrary",
+            validate: {
+                notNull: {
+                    msg: "lastName: Is required"
+                }
+            }
         },
 
         libraryId: {
@@ -56,6 +66,9 @@ module.exports = (sequelize) => {
                             }
                         })
                         .catch(next);
+                },
+                notNull: {
+                    msg: "libraryId: Is required"
                 }
             }
         },

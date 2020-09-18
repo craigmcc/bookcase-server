@@ -427,7 +427,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("author.firstName cannot be null");
+                        .includes("firstName: Is required");
                 }
 
             });
@@ -449,7 +449,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("author.lastName cannot be null");
+                        .includes("lastName: Is required");
                 }
 
             });
@@ -470,7 +470,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("author.libraryId cannot be null");
+                        .includes("libraryId: Is required");
                 }
 
             });

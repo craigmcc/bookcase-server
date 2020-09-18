@@ -306,7 +306,7 @@ describe("LibraryServices Tests", () => {
                         expect.fail(`Should have thrown BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes("library.name cannot be null");
+                        .includes("name: Is required");
                 }
 
             });
