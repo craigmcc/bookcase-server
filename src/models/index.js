@@ -35,13 +35,19 @@ const db = { };
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// db.sequelize.sync();
+db.sequelize.sync({
+    logging: false
+}).then(() => {
+    console.info("Resynchronized database tables (no drop)");
+});
+/*
 db.sequelize.sync({
     force: true,
     logging: false
 }).then(() => {
     console.log("Dropped and resynchronized database tables");
 })
+*/
 
 // Configure Models ----------------------------------------------------------
 

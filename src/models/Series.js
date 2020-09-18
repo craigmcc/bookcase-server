@@ -64,7 +64,27 @@ module.exports = (sequelize) => {
         tableName: "series",
         timestamps: true,
         updatedAt: "updated",
-        validate: { }, // TODO - class level validations
+        validate: {
+            isNameUniqueWithinLibrary: function(next) {
+                let conditions = {
+                    where: {
+                        libraryId: this.libraryId,
+                        name: this.name
+                    }
+                };
+                if (this.id) {
+                    conditions.where["id"] = { [Op.ne]: this.id };
+                }
+                Series.count(conditions)
+                    .then(found => {
+                        return (found !== 0)
+                            ? next(`name: Name '${this.name}' ` +
+                                "is already in use within this Library")
+                            : next();
+                    })
+                    .catch(next);
+            }
+        },
 
         sequelize
 
