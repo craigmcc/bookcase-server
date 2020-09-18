@@ -60,7 +60,7 @@ module.exports = (app) => {
             res.send(await LibraryServices.insert(req.body));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
-                res.status(404).send(err.message);
+                res.status(400).send(err.message);
             } else if (err instanceof BadRequest) {
                 res.status(400).send(err.message);
             } else if (err instanceof NotFound) {
@@ -106,7 +106,7 @@ module.exports = (app) => {
             res.send(await LibraryServices.update(req.params.id));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
-                res.status(404).send(err.message);
+                res.status(400).send(err.message);
             } else if (err instanceof BadRequest) {
                 res.status(400).send(err.message);
             } else if (err instanceof NotFound) {

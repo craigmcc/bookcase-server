@@ -31,7 +31,7 @@ module.exports = (app) => {
             res.send(await SeriesServices.insert(req.body));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
-                res.status(404).send(err.message);
+                res.status(400).send(err.message);
             } else if (err instanceof BadRequest) {
                 res.status(400).send(err.message);
             } else if (err instanceof NotFound) {
@@ -77,13 +77,31 @@ module.exports = (app) => {
             res.send(await SeriesServices.update(req.params.id));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
-                res.status(404).send(err.message);
+                res.status(400).send(err.message);
             } else if (err instanceof BadRequest) {
                 res.status(400).send(err.message);
             } else if (err instanceof NotFound) {
                 res.status(404).send(err.message);
             } else {
                 console.error("SeriesRouters.update() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // POST /:id/author/:authorId - Add Author to this Series
+    router.post("/:id/author/:authorId", async (req, res) => {
+        try {
+            res.send(await SeriesServices.authorAdd(req.params.id, req.params.authorId));
+        } catch (err) {
+            if (err instanceof db.Sequelize.ValidationError) {
+                res.status(400).send(err.message);
+            } else if (err instanceof BadRequest) {
+                res.status(400).send(err.message);
+            } else if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("SeriesRouters.authorAdd() error: ", err);
                 res.status(500).send(err.message);
             }
         }

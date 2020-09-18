@@ -22,17 +22,17 @@ const authorsData0 = {
     author0Data: {
         firstName: "Barney",
         lastName: "Rubble",
-        notes: "Barney Series"
+        notes: "Barney Author"
     },
     author1Data: {
         firstName: "Betty",
         lastName: "Rubble",
-        notes: "Betty Series"
+        notes: "Betty Author"
     },
     author2Data: {
         firstName: "Bam Bam",
         lastName: "Rubble",
-        notes: "Bam Bam Series"
+        notes: "Bam Bam Author"
     }
 }
 
@@ -41,17 +41,17 @@ const authorsData1 = {
     author0Data: {
         firstName: "Fred",
         lastName: "Flintstone",
-        notes: "Fred Series"
+        notes: "Fred Author"
     },
     author1Data: {
         firstName: "Wilma",
         lastName: "Flintstone",
-        notes: "Wilma Series"
+        notes: "Wilma Author"
     },
     author2Data: {
         firstName: "Pebbles",
         lastName: "Flintstone",
-        notes: "Pebbles Series"
+        notes: "Pebbles Author"
     }
 }
 
@@ -87,15 +87,15 @@ const seriesData0 = {
 const seriesData1 = {
     series0Data: {
         name: "Another First Series",
-        notes: "This is the first series"
+        notes: "This is the first series again"
     },
     series1Data: {
         name: "Another Second Series",
-        notes: "This is the second series"
+        notes: "This is the second series again"
     },
     series2Data: {
         name: "Another Third Series",
-        notes: "This is the third series"
+        notes: "This is the third series again"
     }
 }
 
@@ -254,6 +254,163 @@ describe("SeriesServices Tests", () => {
 
     });
 
+    describe("#authorAdd()", () => {
+
+        context("all objects", () => {
+
+            it("should fail with duplicate authorId", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch0 = authors[0].dataValues;
+                let authorMatch1 = authors[0].dataValues; // Duplicate
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[2].dataValues;
+
+                try {
+                    let result0 = await SeriesServices.authorAdd
+                        (seriesMatch.id, authorMatch0.id);
+                    console.info("result0: ", result0)
+                    let result1 = await SeriesServices.authorAdd
+                        (seriesMatch.id, authorMatch1.id);
+                    console.info("result1: ", result1);
+                    expect.fail("Should have thrown BadRequest");
+                } catch (err) {
+                    if (err instanceof BadRequest) {
+                        expect(err.message)
+                            .includes(`authorId: Author ${authorMatch0.id} is already ` +
+                                `associated with Series ${seriesMatch.id}`);
+                    } else {
+                        expect.fail(`Should not have thrown '${err.message}'`);
+                    }
+                }
+
+            });
+
+            it("should fail with invalid authorId", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+//                let authorMatch = authors[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[2].dataValues;
+                let invalidAuthorId = 9999;
+
+                try {
+                    await SeriesServices.authorAdd
+                        (seriesMatch.id, invalidAuthorId);
+                    expect.fail("Should have thrown NotFound");
+                } catch (err) {
+                    if (err instanceof NotFound) {
+                        expect(err.message)
+                            .includes(`authorId: Missing Author ${invalidAuthorId}`);
+                    } else {
+                        expect.fail(`Should not have thrown '${err.message}'`);
+                    }
+                }
+
+            });
+
+            it("should fail with invalid seriesId", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch = authors[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+//                let seriesMatch = series[2].dataValues;
+                let invalidSeriesId = 9999;
+
+                try {
+                    await SeriesServices.authorAdd
+                        (invalidSeriesId, authorMatch.id);
+                    expect.fail("Should have thrown NotFound");
+                } catch (err) {
+                    if (err instanceof NotFound) {
+                        expect(err.message)
+                            .includes(`seriesId: Missing Series ${invalidSeriesId}`);
+                    } else {
+                        expect.fail(`Should not have thrown '${err.message}'`);
+                    }
+                }
+
+            });
+
+            it("should fail with mismatched libraryId", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch0 = libraries[0].dataValues;
+                let libraryMatch1 = libraries[1].dataValues;
+                let authors0 = await loadAuthors(libraryMatch0, authorsData0);
+//                let authorMatch0 = authors0[1].dataValues;
+                let authors1 = await loadAuthors(libraryMatch1, authorsData1);
+                let authorMatch1 = authors1[2].dataValues;
+                let series0 = await loadSeries(libraryMatch0, seriesData0);
+                let seriesMatch0 = series0[0].dataValues;
+
+                try {
+                    await SeriesServices.authorAdd
+                        (seriesMatch0.id, authorMatch1.id);
+                    expect.fail("Should have thrown BadRequest");
+                } catch (err) {
+                    if (err instanceof BadRequest) {
+                        expect(err.message)
+                            .includes(`libraryId: Series ${seriesMatch0.id} belongs to ` +
+                                `Library ${seriesMatch0.libraryId} but Author ${authorMatch1.id} belongs to ` +
+                                `Library ${authorMatch1.libraryId}`);
+                    } else {
+                        expect.fail(`Should not have thrown '${err.message}'`);
+                    }
+                }
+
+            });
+
+            it("should succeed with one author", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch = authors[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[2].dataValues;
+
+                try {
+                    let result = await SeriesServices.authorAdd
+                        (seriesMatch.id, authorMatch.id);
+                    console.info("authorAdd Returned: ", result);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+            it("should succeed with two authors", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[0].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch0 = authors[0].dataValues;
+                let authorMatch1 = authors[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[2].dataValues;
+
+                try {
+                    await SeriesServices.authorAdd
+                        (seriesMatch.id, authorMatch0.id);
+                    await SeriesServices.authorAdd
+                        (seriesMatch.id, authorMatch1.id);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+        });
+
+    })
+
     describe("#find()", () => {
 
         context("all objects", () => {
@@ -288,6 +445,34 @@ describe("SeriesServices Tests", () => {
                 try {
                     let result = await SeriesServices.find(seriesMatch.id);
                     expect(result.name).to.equal(seriesMatch.name);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+            it("should succeed with valid id and nested authors", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[1].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch0 = authors[0].dataValues;
+                let authorMatch1 = authors[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[2].dataValues;
+
+                try {
+                    await SeriesServices.authorAdd(seriesMatch.id, authorMatch0.id);
+                    await SeriesServices.authorAdd(seriesMatch.id, authorMatch1.id);
+                    let result = await SeriesServices.find(seriesMatch.id, {
+                        withAuthors: ""
+                    });
+                    expect(result.name).to.equal(seriesMatch.name);
+                    if (result.authors) {
+                        expect(result.authors.length).to.equal(2);
+                    } else {
+                        expect.fail("Should have included authors");
+                    }
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
                 }

@@ -3,7 +3,8 @@
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../models");
-const Author = db.Library;
+const Author = db.Author;
+const AuthorSeries = db.AuthorSeries;
 const Library = db.Library;
 const Series = db.Series;
 
@@ -160,6 +161,34 @@ exports.update = async (id, data) => {
 }
 
 // Model Specific Methods ----------------------------------------------------
+
+exports.authorAdd = async (seriesId, authorId) => {
+    let series = await Series.findByPk(seriesId);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
+    }
+    let author = await Author.findByPk(authorId);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${authorId}`);
+    }
+    if (series.libraryId !== author.libraryId) {
+        throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
+            `Library ${series.libraryId} but Author ${authorId} belongs to ` +
+            `Library ${author.libraryId}`);
+    }
+    let count = await AuthorSeries.count({
+        where: {
+            authorId: authorId,
+            seriesId: seriesId
+        }
+    });
+    if (count > 0) {
+        throw new BadRequest(`authorId: Author ${authorId} is already ` +
+            `associated with Series ${seriesId}`);
+    }
+    await series.addAuthor(author); // returns instanceof AuthorSeries
+    return author;
+}
 
 exports.seriesAll = async (libraryId, queryParameters) => {
     let library = await Library.findByPk(libraryId);
