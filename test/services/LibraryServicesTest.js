@@ -6,6 +6,7 @@ const db = require("../../src/models");
 const Author = db.Author;
 const Library = db.Library;
 const LibraryServices = require("../../src/services/LibraryServices");
+const Series = db.Series;
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
@@ -68,6 +69,38 @@ const librariesData = {
     }
 }
 
+// Must be seeded with valid libraryId
+const seriesData0 = {
+    series0Data: {
+        name: "First Series",
+        notes: "This is the first series"
+    },
+    series1Data: {
+        name: "Second Series",
+        notes: "This is the second series"
+    },
+    series2Data: {
+        name: "Third Series",
+        notes: "This is the third series"
+    }
+}
+
+// Must be seeded with valid libraryId
+const seriesData1 = {
+    series0Data: {
+        name: "Another First Series",
+        notes: "This is the first series again"
+    },
+    series1Data: {
+        name: "Another Second Series",
+        notes: "This is the second series again"
+    },
+    series2Data: {
+        name: "Another Third Series",
+        notes: "This is the third series again"
+    }
+}
+
 // Returns array of created Author objects
 const loadAuthors = async (library, authorsData) => {
     let data = [
@@ -101,6 +134,26 @@ const loadLibraries = async () => {
         });
     } catch (err) {
         console.error("loadLibraries() error: ", err);
+        throw err;
+    }
+}
+
+// Returns array of created Series objects
+const loadSeries = async (library, seriesData) => {
+    let data = [
+        seriesData.series0Data,
+        seriesData.series1Data,
+        seriesData.series2Data
+    ]
+    data.forEach(datum => {
+        datum.libraryId = library.id
+    });
+    try {
+        return await Series.bulkCreate(data, {
+            validate: true
+        });
+    } catch (err) {
+        console.error("loadSeries() error: ", err);
         throw err;
     }
 }
@@ -186,6 +239,124 @@ describe("LibraryServices Tests", () => {
             });
 
         });
+
+    });
+
+    describe("#authorAll()", () => {
+
+        context("all objects", () => {
+
+            it("should fail with invalid libraryId", async () => {
+
+                let invalidId = 9999;
+
+                try {
+                    await LibraryServices.authorAll(invalidId);
+                    expect.fail("Should have thrown NotFound");
+                } catch (err) {
+                    if (!(err instanceof NotFound)) {
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
+                    }
+                    expect(err.message)
+                        .includes(`libraryId: Missing Library ${invalidId}`);
+                }
+
+            })
+
+            it("should succeed for all authors for library with", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryFirst = libraries[1].dataValues;
+                let librarySecond = libraries[2].dataValues;
+                await loadAuthors(libraryFirst, authorsData0);
+                await loadAuthors(librarySecond, authorsData1);
+
+                try {
+                    let results = await LibraryServices.authorAll(libraryFirst.id);
+                    expect(results.length).to.equal(3);
+                    results.forEach(result => {
+                        expect(result.libraryId).to.equal(libraryFirst.id);
+                    })
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            })
+
+            it("should succeed for no authors for library without", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryFirst = libraries[1].dataValues;
+                let librarySecond = libraries[2].dataValues;
+                await loadAuthors(libraryFirst, authorsData0);
+
+                try {
+                    let results = await LibraryServices.authorAll(libraryFirst.id);
+                    expect(results.length).to.equal(3);
+                    results.forEach(result => {
+                        expect(result.libraryId).to.equal(libraryFirst.id);
+                    })
+                    results = await LibraryServices.authorAll(librarySecond.id);
+                    expect(results.length).to.equal(0);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            })
+
+        });
+
+    })
+
+    describe("#authorExact()", () => {
+
+        context("all objects", () => {
+
+            it("should fail with invalid name", async () => {
+
+                let libraries = await loadLibraries();
+                let authors = await loadAuthors(libraries[1], authorsData0);
+                let invalidFirstName = "Foo Bar";
+                let invalidLastName = "Baz Bop";
+
+                try {
+                    await LibraryServices.authorExact
+                    (authors[0].libraryId, invalidFirstName, invalidLastName);
+                    expect.fail("Should have thrown NotFound initially");
+                } catch (err) {
+                    if (!(err instanceof NotFound)) {
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
+                    }
+                    expect(err.message)
+                        .includes(`name: Missing Author '${invalidFirstName} ${invalidLastName}'`);
+                }
+
+            });
+
+            it("should succeed with valid name", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[2].dataValues;
+                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let authorMatch = authors[1].dataValues;
+
+                try {
+                    let result = await LibraryServices.authorExact
+                    (libraryMatch.id, authorMatch.firstName, authorMatch.lastName);
+                    expect(result.id).to.equal(authorMatch.id);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+        });
+
+    });
+
+    describe("#authorName()", () => {
+
+        // WARNING:  sqlite3 does not understand iLike operator so we cannot test
 
     });
 
@@ -379,6 +550,127 @@ describe("LibraryServices Tests", () => {
             });
 
         });
+
+    });
+
+    describe("#seriesAll()", () => {
+
+        context("all objects", () => {
+
+            it("should fail with invalid libraryId", async () => {
+
+                let invalidId = 9999;
+
+                try {
+                    await LibraryServices.seriesAll
+                        (invalidId);
+                    expect.fail("Should have thrown NotFound");
+                } catch (err) {
+                    if (!(err instanceof NotFound)) {
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
+                    }
+                    expect(err.message)
+                        .includes(`libraryId: Missing Library ${invalidId}`);
+                }
+
+            })
+
+            it("should succeed for all series for library with", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryFirst = libraries[1].dataValues;
+                let librarySecond = libraries[2].dataValues;
+                await loadSeries(libraryFirst, seriesData0);
+                await loadSeries(librarySecond, seriesData1);
+
+                try {
+                    let results = await LibraryServices.seriesAll
+                        (libraryFirst.id);
+                    expect(results.length).to.equal(3);
+                    results.forEach(result => {
+                        expect(result.libraryId).to.equal(libraryFirst.id);
+                    })
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            })
+
+            it("should succeed for no authors for library without", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryFirst = libraries[1].dataValues;
+                let librarySecond = libraries[2].dataValues;
+                await loadSeries(libraryFirst, seriesData0);
+
+                try {
+                    let results = await LibraryServices.seriesAll
+                        (libraryFirst.id);
+                    expect(results.length).to.equal(3);
+                    results.forEach(result => {
+                        expect(result.libraryId).to.equal(libraryFirst.id);
+                    })
+                    results = await LibraryServices.seriesAll(librarySecond.id);
+                    expect(results.length).to.equal(0);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            })
+
+        });
+
+    })
+
+    describe("#seriesExact()", () => {
+
+        context("all objects", () => {
+
+            it("should fail with invalid name", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[1].dataValues;
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let invalidName = "Foo Bar";
+
+                try {
+                    await LibraryServices.seriesExact
+                        (series[0].libraryId, invalidName);
+                    expect.fail("Should have thrown NotFound initially");
+                } catch (err) {
+                    if (!(err instanceof NotFound)) {
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
+                    }
+                    expect(err.message)
+                        .includes(`name: Missing Series '${invalidName}'`);
+                }
+
+            });
+
+            it("should succeed with valid name", async () => {
+
+                let libraries = await loadLibraries();
+                let libraryMatch = libraries[2];
+                let series = await loadSeries(libraryMatch, seriesData0);
+                let seriesMatch = series[1];
+
+                try {
+                    let result = await LibraryServices.seriesExact
+                        (libraryMatch.id, seriesMatch.name);
+                    expect(result.id).to.equal(seriesMatch.id);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+        });
+
+    });
+
+    describe("#seriesName()", () => {
+
+        // WARNING:  sqlite3 does not understand iLike operator so we cannot test
 
     });
 

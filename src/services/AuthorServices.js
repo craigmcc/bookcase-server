@@ -165,30 +165,11 @@ exports.update = async (id, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
-exports.authorAll = async (libraryId, queryParameters) => {
-    let library = await Library.findByPk(libraryId);
-    if (!library) {
-        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
-    }
-    let options = appendQueryParameters({
-        order: order,
-        where: {
-            libraryId: libraryId
-        }
-    }, queryParameters);
-    return await Author.findAll(options);
-}
-
-exports.authorExact = async (libraryId, firstName, lastName, queryParameters) => {
-    let library = await Library.findByPk(libraryId);
-    if (!library) {
-        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
-    }
+exports.exact = async (firstName, lastName, queryParameters) => {
     let options = appendQueryParameters({
         where: {
             firstName: firstName,
-            lastName: lastName,
-            libraryId: libraryId,
+            lastName: lastName
         }
     }, queryParameters);
     let results = await Author.findAll(options);
@@ -198,15 +179,10 @@ exports.authorExact = async (libraryId, firstName, lastName, queryParameters) =>
     return results[0];
 }
 
-exports.authorName = async (libraryId, name, queryParameters) => {
-    let library = await Library.findByPk(libraryId);
-    if (!library) {
-        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
-    }
+exports.name = async (name, queryParameters) => {
     let options = appendQueryParameters({
         order: order,
         where: {
-            libraryId: libraryId,
             [Op.or]: {
                 firstName: {[Op.iLike]: `%${name}%`},
                 lastName: {[Op.iLike]: `%${name}%`}
@@ -214,4 +190,47 @@ exports.authorName = async (libraryId, name, queryParameters) => {
         }
     }, queryParameters);
     return await Author.findAll(options);
+}
+
+exports.seriesAll = async (id, queryParameters) => {
+    let author = await Author.findByPk(id);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${id}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
+    }, queryParameters);
+    return await author.getSeries(options);
+}
+
+exports.seriesExact = async (id, name, queryParameters) => {
+    let author = await Author.findByPk(id);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${id}`);
+    }
+    let options = appendQueryParameters({
+        where: {
+            name: name,
+        }
+    }, queryParameters);
+    let results = await author.getSeries(options);
+    if (results.length !== 1) {
+        throw new NotFound(`name: Missing Series '${name}'`);
+    }
+    return results[0];
+}
+
+exports.seriesName = async (id, name, queryParameters) => {
+    let author = await Author.findByPk(id);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${id}`);
+    }
+    let options = appendQueryParameters({
+        order: [ ["name", "ASC" ]],
+        where: {
+            name: { [Op.iLike]: `%${name}%`},
+        }
+    }, queryParameters);
+    return await author.getSeries(options);
 }

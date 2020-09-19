@@ -69,6 +69,7 @@ const librariesData = {
     }
 }
 
+// Must be seeded with valid libraryId
 const seriesData0 = {
     series0Data: {
         name: "First Series",
@@ -84,6 +85,7 @@ const seriesData0 = {
     }
 }
 
+// Must be seeded with valid libraryId
 const seriesData1 = {
     series0Data: {
         name: "Another First Series",
@@ -271,10 +273,8 @@ describe("SeriesServices Tests", () => {
                 try {
                     let result0 = await SeriesServices.authorAdd
                         (seriesMatch.id, authorMatch0.id);
-                    console.info("result0: ", result0)
                     let result1 = await SeriesServices.authorAdd
                         (seriesMatch.id, authorMatch1.id);
-                    console.info("result1: ", result1);
                     expect.fail("Should have thrown BadRequest");
                 } catch (err) {
                     if (err instanceof BadRequest) {
@@ -379,7 +379,6 @@ describe("SeriesServices Tests", () => {
                 try {
                     let result = await SeriesServices.authorAdd
                         (seriesMatch.id, authorMatch.id);
-                    console.info("authorAdd Returned: ", result);
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
                 }
@@ -643,128 +642,6 @@ describe("SeriesServices Tests", () => {
             });
 
         });
-
-    });
-
-    describe("#seriesAll()", () => {
-
-        context("all objects", () => {
-
-            it("should fail with invalid libraryId", async () => {
-
-                let invalidId = 9999;
-
-                try {
-                    await SeriesServices.seriesAll(invalidId);
-                    expect.fail("Should have thrown NotFound");
-                } catch (err) {
-                    if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
-                    }
-                    expect(err.message)
-                        .includes(`libraryId: Missing Library ${invalidId}`);
-                }
-
-            })
-
-            it("should succeed for all series for library with", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryFirst = libraries[1].dataValues;
-                let librarySecond = libraries[2].dataValues;
-                await loadSeries(libraryFirst, seriesData0);
-                await loadSeries(librarySecond, seriesData1);
-
-                try {
-                    let complete = await SeriesServices.all();
-                    expect(complete.length).to.equal(6);
-                    let results = await SeriesServices.seriesAll(libraryFirst.id);
-                    expect(results.length).to.equal(3);
-                    results.forEach(result => {
-                        expect(result.libraryId).to.equal(libraryFirst.id);
-                    })
-                } catch (err) {
-                    expect.fail(`Should not have thrown '${err.message}'`);
-                }
-
-            })
-
-            it("should succeed for no authors for library without", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryFirst = libraries[1].dataValues;
-                let librarySecond = libraries[2].dataValues;
-                await loadSeries(libraryFirst, seriesData0);
-
-                try {
-                    let complete = await SeriesServices.all();
-                    expect(complete.length).to.equal(3);
-                    let results = await SeriesServices.seriesAll(libraryFirst.id);
-                    expect(results.length).to.equal(3);
-                    results.forEach(result => {
-                        expect(result.libraryId).to.equal(libraryFirst.id);
-                    })
-                    results = await SeriesServices.seriesAll(librarySecond.id);
-                    expect(results.length).to.equal(0);
-                } catch (err) {
-                    expect.fail(`Should not have thrown '${err.message}'`);
-                }
-
-            })
-
-        });
-
-    })
-
-    describe("#seriesExact()", () => {
-
-        context("all objects", () => {
-
-            it("should fail with invalid name", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[1].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let invalidName = "Foo Bar";
-
-                try {
-                    await SeriesServices.seriesExact
-                    (series[0].libraryId, invalidName);
-                    expect.fail("Should have thrown NotFound initially");
-                } catch (err) {
-                    if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
-                    }
-                    expect(err.message)
-                        .includes(`name: Missing Series '${invalidName}'`);
-                }
-
-            });
-
-            it("should succeed with valid name", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[2];
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[1];
-
-                try {
-                    let result = await SeriesServices.seriesExact
-                    (libraryMatch.id, seriesMatch.name);
-                    expect(result.id).to.equal(seriesMatch.id);
-                } catch (err) {
-                    expect.fail(`Should not have thrown '${err.message}'`);
-                }
-
-            });
-
-        });
-
-    });
-
-    describe("#seriesName()", () => {
-
-        // WARNING:  sqlite3 does not understand iLike operator so we cannot test
 
     });
 

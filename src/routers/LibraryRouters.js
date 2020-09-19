@@ -123,7 +123,7 @@ module.exports = (app) => {
     // GET /:id/authors - Find Authors by Library ID
     router.get("/:id/authors", async (req, res) => {
         try {
-            res.send(await AuthorServices.authorAll(req.params.id, req.query));
+            res.send(await LibraryServices.authorAll(req.params.id, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -138,7 +138,7 @@ module.exports = (app) => {
     //   - Find Author by Library ID and exact names
     router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
         try {
-            res.send(await AuthorServices.authorExact
+            res.send(await LibraryServices.authorExact
                 (req.params.id, req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
@@ -154,8 +154,8 @@ module.exports = (app) => {
     // GET /:id/authors/name/:name - Find Authors by Library ID and name segment
     router.get("/:id/authors/name/:name", async (req, res) => {
         try {
-            res.send(await AuthorServices.authorName
-                (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.authorName
+                    (req.params.id, req.params.name, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -169,7 +169,8 @@ module.exports = (app) => {
     // GET /:id/series - Find Series by Library ID
     router.get("/:id/series", async (req, res) => {
         try {
-            res.send(await SeriesServices.seriesAll(req.params.id, req.query));
+            res.send(await SeriesServices.seriesAll
+                (req.params.id, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);
@@ -184,7 +185,7 @@ module.exports = (app) => {
     router.get("/:id/series/exact/:name", async (req, res) => {
         try {
             res.send(await SeriesServices.seriesExact
-            (req.params.id, req.params.name, req.query));
+                (req.params.id, req.params.name, req.query));
         } catch (err) {
             if (err instanceof NotFound) {
                 res.status(404).send(err.message);

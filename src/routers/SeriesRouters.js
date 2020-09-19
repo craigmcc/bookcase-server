@@ -15,6 +15,34 @@ const router = require("express").Router();
 
 module.exports = (app) => {
 
+    // Model Specific Endpoints (no id) --------------------------------------
+
+    // GET /exact/:name - Find Series by exact name
+    router.get("/exact/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.exact(req.params.name, req.query));
+        } catch (err) {
+            if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("SeriesRouters.exact() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // GET /name/:name - Find Library objects by name segment match
+    router.get("/name/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.name(req.params.name, req.query));
+        } catch (err) {
+            console.error("SeriesRouters.name() error: ", err);
+            res.status(500).send(err.message);
+        }
+    })
+
+    // Standard CRUD Endpoints -----------------------------------------------
+
     // GET / - Find all Series objects
     router.get("/", async (req, res) => {
         try {
@@ -89,10 +117,49 @@ module.exports = (app) => {
         }
     })
 
-    // POST /:id/author/:authorId - Add Author to this Series
-    router.post("/:id/author/:authorId", async (req, res) => {
+    // Model Specific Endpoints ----------------------------------------------
+
+    // GET /:id/authors - Get all Authors for this Series (optionally paginated)
+    router.get("/:id/authors", async (req, res) => {
         try {
-            res.send(await SeriesServices.authorAdd(req.params.id, req.params.authorId));
+            res.send(await SeriesServices.authorAll
+                (req.params.id, req.query));
+        } catch (err) {
+            if (err instanceof BadRequest) {
+                res.status(400).send(err.message);
+            } else if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("SeriesRouters.authorAll() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // GET /:id/authors/exact/:firstName/:lastName
+    //   - Get Author for this Series by exact name
+    router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
+        try {
+            res.send(await SeriesServices.authorExact
+                (req.params.id, req.params.firstName,
+                 req.params.lastName, req.query));
+        } catch (err) {
+            if (err instanceof BadRequest) {
+                res.status(400).send(err.message);
+            } else if (err instanceof NotFound) {
+                res.status(404).send(err.message);
+            } else {
+                console.error("SeriesRouters.authorAll() error: ", err);
+                res.status(500).send(err.message);
+            }
+        }
+    })
+
+    // POST /:id/authors/:authorId - Add Author to this Series
+    router.post("/:id/authors/:authorId", async (req, res) => {
+        try {
+            res.send(await SeriesServices.authorAdd
+                (req.params.id, req.params.authorId));
         } catch (err) {
             if (err instanceof db.Sequelize.ValidationError) {
                 res.status(400).send(err.message);
@@ -110,7 +177,5 @@ module.exports = (app) => {
     // Export Routes ---------------------------------------------------------
 
     app.use("/api/series", router);
-
-
 
 }

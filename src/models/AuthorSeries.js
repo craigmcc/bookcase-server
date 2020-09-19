@@ -26,7 +26,7 @@ module.exports = (sequelize) => {
             allowNull: false,
             field: "authorid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need databsae enforcement?
+            unique: "uniqueJoin", // TODO - do we need database enforcement?
             validate: { } // TODO - field level validations
         },
 
