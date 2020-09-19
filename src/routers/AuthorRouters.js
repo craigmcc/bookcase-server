@@ -4,8 +4,7 @@
 
 const db = require("../models");
 const AuthorServices = require("../services/AuthorServices");
-const BadRequest = require("../util/BadRequest");
-const NotFound = require("../util/NotFound");
+const FormatErrorResponse = require("../util/FormatErrorResponse");
 
 // External Modules ----------------------------------------------------------
 
@@ -23,12 +22,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.exact
             (req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.exact() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.exact()");
+            res.status(status).send(message);
         }
     })
 
@@ -37,8 +32,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.name(req.params.name, req.query));
         } catch (err) {
-            console.error("AuthorRouters.name() error: ", err);
-            res.status(500).send(err.message);
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.name()");
+            res.status(status).send(message);
         }
     })
 
@@ -49,8 +44,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.all(req.query));
         } catch (err) {
-            console.error("AuthorRouters.all() error: ", err);
-            res.status(500).send(err.message);
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.all()");
+            res.status(status).send(message);
         }
     })
 
@@ -59,16 +54,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.insert(req.body));
         } catch (err) {
-            if (err instanceof db.Sequelize.ValidationError) {
-                res.status(400).send(err.message);
-            } else if (err instanceof BadRequest) {
-                res.status(400).send(err.message);
-            } else if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.insert() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.insert()");
+            res.status(status).send(message);
         }
     })
 
@@ -77,12 +64,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.remove(req.params.id));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.remove() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.remove()");
+            res.status(status).send(message);
         }
     })
 
@@ -91,30 +74,18 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.find(req.params.id, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.find() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.find()");
+            res.status(status).send(message);
         }
     })
 
     // PUT /:id - Update Author by ID
     router.put("/:id", async (req, res) => {
         try {
-            res.send(await AuthorServices.update(req.params.id));
+            res.send(await AuthorServices.update(req.params.id, req.body));
         } catch (err) {
-            if (err instanceof db.Sequelize.ValidationError) {
-                res.status(400).send(err.message);
-            } else if (err instanceof BadRequest) {
-                res.status(400).send(err.message);
-            } else if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.update() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.update()");
+            res.status(status).send(message);
         }
     })
 
@@ -126,12 +97,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesAll
                 (req.params.id, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.seriesAll() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAll()");
+            res.status(status).send(message);
         }
     })
 
@@ -141,12 +108,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesExact
                 (req.params.id, req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("AuthorRouters.seriesExact() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesExact()");
+            res.status(status).send(message);
         }
     })
 
@@ -157,12 +120,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesName
                 (req.params.id, req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.seriesName() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesName()");
+            res.status(status).send(message);
         }
     })
 

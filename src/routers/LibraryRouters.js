@@ -3,10 +3,8 @@
 // Internal Modules ----------------------------------------------------------
 
 const db = require("../models");
-const AuthorServices = require("../services/AuthorServices");
+const FormatErrorResponse = require("../util/FormatErrorResponse");
 const LibraryServices = require("../services/LibraryServices");
-const BadRequest = require("../util/BadRequest");
-const NotFound = require("../util/NotFound");
 
 // External Modules ----------------------------------------------------------
 
@@ -23,12 +21,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.exact(req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.exact() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.exact()");
+            res.status(status).send(message);
         }
     })
 
@@ -37,8 +31,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.name(req.params.name, req.query));
         } catch (err) {
-            console.error("LibraryRouters.name() error: ", err);
-            res.status(500).send(err.message);
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.name()");
+            res.status(status).send(message);
         }
     })
 
@@ -49,8 +43,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.all(req.query));
         } catch (err) {
-            console.error("LibraryRouters.all() error: ", err);
-            res.status(500).send(err.message);
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.all()");
+            res.status(status).send(message);
         }
     })
 
@@ -59,16 +53,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.insert(req.body));
         } catch (err) {
-            if (err instanceof db.Sequelize.ValidationError) {
-                res.status(400).send(err.message);
-            } else if (err instanceof BadRequest) {
-                res.status(400).send(err.message);
-            } else if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.insert() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.insert()");
+            res.status(status).send(message);
         }
     })
 
@@ -77,12 +63,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.remove(req.params.id));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.remove() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.remove()");
+            res.status(status).send(message);
         }
     })
 
@@ -91,30 +73,18 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.find(req.params.id, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.find() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.find()");
+            res.status(status).send(message);
         }
     })
 
     // PUT /:id - Update Library by ID
     router.put("/:id", async (req, res) => {
         try {
-            res.send(await LibraryServices.update(req.params.id));
+            res.send(await LibraryServices.update(req.params.id, req.body));
         } catch (err) {
-            if (err instanceof db.Sequelize.ValidationError) {
-                res.status(400).send(err.message);
-            } else if (err instanceof BadRequest) {
-                res.status(400).send(err.message);
-            } else if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.update() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.update()");
+            res.status(status).send(message);
         }
     })
 
@@ -125,12 +95,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.authorAll(req.params.id, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.authorAll() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorAll()");
+            res.status(status).send(message);
         }
     })
 
@@ -141,12 +107,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.authorExact
                 (req.params.id, req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.authorExact() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorExact()");
+            res.status(status).send(message);
         }
     })
 
@@ -157,12 +119,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.authorName
                     (req.params.id, req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.authorName() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorName()");
+            res.status(status).send(message);
         }
     })
 
@@ -172,12 +130,8 @@ module.exports = (app) => {
             res.send(await SeriesServices.seriesAll
                 (req.params.id, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.seriesAll() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesAll()");
+            res.status(status).send(message);
         }
     })
 
@@ -187,12 +141,8 @@ module.exports = (app) => {
             res.send(await SeriesServices.seriesExact
                 (req.params.id, req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.seriesExact() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesExact()");
+            res.status(status).send(message);
         }
     })
 
@@ -203,12 +153,8 @@ module.exports = (app) => {
             res.send(await SeriesServices.seriesName
             (req.params.id, req.params.name, req.query));
         } catch (err) {
-            if (err instanceof NotFound) {
-                res.status(404).send(err.message);
-            } else {
-                console.error("LibraryRouters.seriesName() error: ", err);
-                res.status(500).send(err.message);
-            }
+            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesName()");
+            res.status(status).send(message);
         }
     })
 
