@@ -53,15 +53,27 @@ db.sequelize.sync({
 
 db.Author = require("./Author")(sequelize);
 db.AuthorSeries = require("./AuthorSeries")(sequelize);
+db.AuthorStory = require("./AuthorStory")(sequelize);
+db.AuthorVolume = require("./AuthorVolume")(sequelize);
 db.Library = require("./Library")(sequelize);
 db.Series = require("./Series")(sequelize);
+db.SeriesStory = require("./SeriesStory")(sequelize);
+db.Story = require("./Story")(sequelize);
+db.Volume = require("./Volume")(sequelize);
+db.VolumeStory = require("./VolumeStory")(sequelize);
 
 // Configure Associations ----------------------------------------------------
 
 db.Author.associate(db);
 db.AuthorSeries.associate(db);
+db.AuthorStory.associate(db);
+db.AuthorVolume.associate(db);
 db.Library.associate(db);
 db.Series.associate(db);
+db.SeriesStory.associate(db);
+db.Story.associate(db);
+db.Volume.associate(db);
+db.VolumeStory.associate(db);
 
 // Export Database Interface -------------------------------------------------
 

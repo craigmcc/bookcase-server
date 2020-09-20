@@ -4,6 +4,8 @@
 
 let Author;    // Filled in by associate()
 let Series;    // Filled in by associate()
+let Story;     // Filled in by associate()
+let Volume;    // Filled in by associate()
 
 // External Modules ----------------------------------------------------------
 
@@ -62,7 +64,7 @@ module.exports = (sequelize) => {
 
         createdAt: "published",
         modelName: "library",
-        tableName: "library",
+        tableName: "libraries",
         timestamps: true,
         updatedAt: "updated",
         validate: { }, // TODO - class level validations
@@ -78,10 +80,14 @@ module.exports = (sequelize) => {
 
         Author = models.Author;
         Series = models.Series;
+        Story = models.Story;
+        Volume = models.Volume;
 
         Library.hasMany(Author);
 
         Library.hasMany(Series);
+
+//        Library.hasMany(Story);
 
 //        Library.hasMany(Volume);
 

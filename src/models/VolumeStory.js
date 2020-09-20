@@ -8,12 +8,12 @@ const { DataTypes, Model } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-    // AuthorSeries Model ----------------------------------------------------
+    // VolumeStory Model ----------------------------------------------------
 
-    class AuthorSeries extends Model {
+    class VolumeStory extends Model {
     }
 
-    AuthorSeries.init({
+    VolumeStory.init({
 
 /*
         id: {
@@ -24,27 +24,27 @@ module.exports = (sequelize) => {
         },
 */
 
-        authorId: {
+        storyId: {
             allowNull: false,
-            field: "authorid",
+            field: "storyid",
+            type: DataTypes.BIGINT,
+            unique: "uniqueJoin", // TODO - do we need database enforcement?
+
+        },
+
+        volumeId: {
+            allowNull: false,
+            field: "volumeid",
             type: DataTypes.BIGINT,
             unique: "uniqueJoin", // TODO - do we need database enforcement?
             validate: { } // TODO - field level validations
         },
 
-        seriesId: {
-            allowNull: false,
-            field: "seriesid",
-            type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-
-        }
-
     }, {
 
         createdAt: "published",
-        modelName: "authorseries",
-        tableName: "authorsseries",
+        modelName: "volumestory",
+        tableName: "volumesstories",
         timestamps: false,
         updatedAt: "updated",
         validate: { }, // TODO - class level validations
@@ -54,9 +54,9 @@ module.exports = (sequelize) => {
 
     });
 
-    // AuthorSeries Associations ---------------------------------------------
+    // VolumeStory Associations ---------------------------------------------
 
-    AuthorSeries.associate = (models) => {
+    VolumeStory.associate = (models) => {
 
         // Nothing further?
 
@@ -64,6 +64,6 @@ module.exports = (sequelize) => {
 
     // Export Model ----------------------------------------------------------
 
-    return AuthorSeries;
+    return VolumeStory;
 
 }

@@ -3,8 +3,12 @@
 // Internal Modules ----------------------------------------------------------
 
 let AuthorSeries; // Filled in by associate()
+let AuthorStory;  // Filled in by associate()
+let AuthorVolume; // Filled in by associate()
 let Library;      // Filled in by associate()
 let Series;       // Filled in by associate()
+let Story;        // Filled in by associate()
+let Volume;       // Filled in by associate()
 
 // External Modules ----------------------------------------------------------
 
@@ -82,7 +86,7 @@ module.exports = (sequelize) => {
 
         createdAt: "published",
         modelName: "author",
-        tableName: "author",
+        tableName: "authors",
         timestamps: true,
         updatedAt: "updated",
         validate: {
@@ -120,10 +124,16 @@ module.exports = (sequelize) => {
     Author.associate = (models) => {
 
         AuthorSeries = models.AuthorSeries;
+        AuthorStory = models.AuthorStory;
+        AuthorVolume = models.AuthorVolume;
         Library = models.Library;
         Series = models.Series;
+        Story = models.Story;
+        Volume = models.Volume;
 
         Author.belongsToMany(Series, { through: AuthorSeries });
+
+        Author.belongsToMany(Story, { through: AuthorStory });
 
         Author.belongsTo(Library, {
             onDelete: "CASCADE",
@@ -132,9 +142,9 @@ module.exports = (sequelize) => {
             }
         });
 
-//        models.Author.belongsToMany(Story, { through: AuthorStory });
+        models.Author.belongsToMany(Story, { through: AuthorStory });
 
-//        models.Author.belongsToMany(Volume, { through: AuthorVolume });
+        models.Author.belongsToMany(Volume, { through: AuthorVolume });
 
     }
 

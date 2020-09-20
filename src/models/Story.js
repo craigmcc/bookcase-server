@@ -3,10 +3,12 @@
 // Internal Modules ----------------------------------------------------------
 
 let Author;       // Filled in by associate()
-let AuthorSeries; // Filled in by associate()
+let AuthorStory;  // Filled in by associate()
 let Library;      // Filled in by associate()
+let Series;       // Filled in by associate()
 let SeriesStory;  // Filled in by associate()
-let Story;        // Filled in by associate()
+let Volume;       // Filled in by associate()
+let VolumeStory;  // Filled in by associate()
 
 // External Modules ----------------------------------------------------------
 
@@ -14,12 +16,12 @@ const { DataTypes, Model, Op } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-    // Series Model ----------------------------------------------------------
+    // Story Model ----------------------------------------------------------
 
-    class Series extends Model {
+    class Story extends Model {
     }
 
-    Series.init({
+    Story.init({
 
         id: {
             allowNull: false,
@@ -71,9 +73,9 @@ module.exports = (sequelize) => {
 
         createdAt: "published",
         freezeTableName: true,
-        modelName: "series",
-        tableName: "series",
-        timestamps: true,
+        modelName: "story",
+        tableName: "stories",
+        timestamps: false,
         updatedAt: "updated",
         validate: {
             isNameUniqueWithinLibrary: function(next) {
@@ -86,7 +88,7 @@ module.exports = (sequelize) => {
                 if (this.id) {
                     conditions.where["id"] = { [Op.ne]: this.id };
                 }
-                Series.count(conditions)
+                Story.count(conditions)
                     .then(found => {
                         return (found !== 0)
                             ? next(`name: Name '${this.name}' ` +
@@ -102,31 +104,35 @@ module.exports = (sequelize) => {
 
     });
 
-    // Series Associations ---------------------------------------------------
+    // Story Associations ---------------------------------------------------
 
-    Series.associate = (models) => {
+    Story.associate = (models) => {
 
         Author = models.Author;
-        AuthorSeries = models.AuthorSeries;
+        AuthorStory = models.AuthorStory;
         Library = models.Library;
+        Series = models.Series;
         SeriesStory = models.SeriesStory;
-        Story = models.Story;
+        Volume = models.Volume;
+        VolumeStory = models.VolumeStory;
 
-        Series.belongsToMany(Author, { through: AuthorSeries });
+        Story.belongsToMany(Author, { through: AuthorStory });
 
-        Series.belongsTo(Library, {
+        Story.belongsTo(Library, {
             onDelete: "CASCADE",
             foreignKey: {
                 allowNull: false
             }
         });
 
-//        Series.belongsToMany(Story, { through: SeriesStory });
+        Story.belongsToMany(Series, { through: SeriesStory });
+
+        Story.belongsToMany(Volume, { through: VolumeStory });
 
     }
 
     // Export Model ----------------------------------------------------------
 
-    return Series;
+    return Story;
 
 }

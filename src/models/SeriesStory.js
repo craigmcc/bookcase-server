@@ -8,12 +8,12 @@ const { DataTypes, Model } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-    // AuthorSeries Model ----------------------------------------------------
+    // SeriesStory Model ----------------------------------------------------
 
-    class AuthorSeries extends Model {
+    class SeriesStory extends Model {
     }
 
-    AuthorSeries.init({
+    SeriesStory.init({
 
 /*
         id: {
@@ -24,12 +24,10 @@ module.exports = (sequelize) => {
         },
 */
 
-        authorId: {
-            allowNull: false,
-            field: "authorid",
-            type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-            validate: { } // TODO - field level validations
+        ordinal: {
+            allowNull: true,    // TODO: should be false?
+            type: DataTypes.SMALLINT,
+            validate: { }       // TODO: must be positive
         },
 
         seriesId: {
@@ -37,14 +35,22 @@ module.exports = (sequelize) => {
             field: "seriesid",
             type: DataTypes.BIGINT,
             unique: "uniqueJoin", // TODO - do we need database enforcement?
+            validate: { } // TODO - field level validations
+        },
 
-        }
+        storyId: {
+            allowNull: false,
+            field: "storyid",
+            type: DataTypes.BIGINT,
+            unique: "uniqueJoin", // TODO - do we need database enforcement?
+
+        },
 
     }, {
 
         createdAt: "published",
-        modelName: "authorseries",
-        tableName: "authorsseries",
+        modelName: "seriesstory",
+        tableName: "seriesstories",
         timestamps: false,
         updatedAt: "updated",
         validate: { }, // TODO - class level validations
@@ -54,9 +60,9 @@ module.exports = (sequelize) => {
 
     });
 
-    // AuthorSeries Associations ---------------------------------------------
+    // SeriesStory Associations ---------------------------------------------
 
-    AuthorSeries.associate = (models) => {
+    SeriesStory.associate = (models) => {
 
         // Nothing further?
 
@@ -64,6 +70,6 @@ module.exports = (sequelize) => {
 
     // Export Model ----------------------------------------------------------
 
-    return AuthorSeries;
+    return SeriesStory;
 
 }

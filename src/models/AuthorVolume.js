@@ -8,12 +8,12 @@ const { DataTypes, Model } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-    // AuthorSeries Model ----------------------------------------------------
+    // AuthorVolume Model ----------------------------------------------------
 
-    class AuthorSeries extends Model {
+    class AuthorVolume extends Model {
     }
 
-    AuthorSeries.init({
+    AuthorVolume.init({
 
 /*
         id: {
@@ -32,9 +32,9 @@ module.exports = (sequelize) => {
             validate: { } // TODO - field level validations
         },
 
-        seriesId: {
+        volumeId: {
             allowNull: false,
-            field: "seriesid",
+            field: "volumeid",
             type: DataTypes.BIGINT,
             unique: "uniqueJoin", // TODO - do we need database enforcement?
 
@@ -43,8 +43,8 @@ module.exports = (sequelize) => {
     }, {
 
         createdAt: "published",
-        modelName: "authorseries",
-        tableName: "authorsseries",
+        modelName: "authorvolume",
+        tableName: "authorsvolumes",
         timestamps: false,
         updatedAt: "updated",
         validate: { }, // TODO - class level validations
@@ -54,9 +54,9 @@ module.exports = (sequelize) => {
 
     });
 
-    // AuthorSeries Associations ---------------------------------------------
+    // AuthorVolume Associations ---------------------------------------------
 
-    AuthorSeries.associate = (models) => {
+    AuthorVolume.associate = (models) => {
 
         // Nothing further?
 
@@ -64,6 +64,6 @@ module.exports = (sequelize) => {
 
     // Export Model ----------------------------------------------------------
 
-    return AuthorSeries;
+    return AuthorVolume;
 
 }

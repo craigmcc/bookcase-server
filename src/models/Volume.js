@@ -2,11 +2,9 @@
 
 // Internal Modules ----------------------------------------------------------
 
-let Author;       // Filled in by associate()
-let AuthorSeries; // Filled in by associate()
 let Library;      // Filled in by associate()
-let SeriesStory;  // Filled in by associate()
 let Story;        // Filled in by associate()
+let VolumeStory;  // Filled in by associate()
 
 // External Modules ----------------------------------------------------------
 
@@ -14,18 +12,23 @@ const { DataTypes, Model, Op } = require("sequelize");
 
 module.exports = (sequelize) => {
 
-    // Series Model ----------------------------------------------------------
+    // Volume Model ----------------------------------------------------------
 
-    class Series extends Model {
+    class Volume extends Model {
     }
 
-    Series.init({
+    Volume.init({
 
         id: {
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
             type: DataTypes.BIGINT
+        },
+
+        isbn: {
+            allowNull: true,
+            type: DataTypes.STRING
         },
 
         libraryId: {
@@ -71,8 +74,8 @@ module.exports = (sequelize) => {
 
         createdAt: "published",
         freezeTableName: true,
-        modelName: "series",
-        tableName: "series",
+        modelName: "volume",
+        tableName: "volumes",
         timestamps: true,
         updatedAt: "updated",
         validate: {
@@ -86,7 +89,7 @@ module.exports = (sequelize) => {
                 if (this.id) {
                     conditions.where["id"] = { [Op.ne]: this.id };
                 }
-                Series.count(conditions)
+                Volume.count(conditions)
                     .then(found => {
                         return (found !== 0)
                             ? next(`name: Name '${this.name}' ` +
@@ -94,7 +97,7 @@ module.exports = (sequelize) => {
                             : next();
                     })
                     .catch(next);
-            }
+            },
         },
         version: true,
 
@@ -102,31 +105,27 @@ module.exports = (sequelize) => {
 
     });
 
-    // Series Associations ---------------------------------------------------
+    // Volume Associations ---------------------------------------------------
 
-    Series.associate = (models) => {
+    Volume.associate = (models) => {
 
-        Author = models.Author;
-        AuthorSeries = models.AuthorSeries;
         Library = models.Library;
-        SeriesStory = models.SeriesStory;
         Story = models.Story;
+        VolumeStory = models.VolumeStory;
 
-        Series.belongsToMany(Author, { through: AuthorSeries });
-
-        Series.belongsTo(Library, {
+        Volume.belongsTo(Library, {
             onDelete: "CASCADE",
             foreignKey: {
                 allowNull: false
             }
         });
 
-//        Series.belongsToMany(Story, { through: SeriesStory });
+        Volume.belongsToMany(Story, { through: VolumeStory });
 
     }
 
     // Export Model ----------------------------------------------------------
 
-    return Series;
+    return Volume;
 
 }
