@@ -4,15 +4,20 @@
 
 const db = require("../models");
 const Author = db.Author;
-const AuthorSeries = db.AuthorSeries;
+const AuthorVolume = db.AuthorVolume;
 const Library = db.Library;
-const Series = db.Series;
+const Story = db.Story;
+const Volume = db.Volume;
+const VolumeStory = db.VolumeStory;
 
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
 const fields = [
+    "isbn",
     "libraryId",
+    "location",
+    "media",
     "name",
     "notes"
 ];
@@ -60,11 +65,9 @@ let appendQueryParameters = (options, queryParameters) => {
     if ("" === queryParameters["withLibrary"]) {
         include.push(Library);
     }
-    /*
-        if ("" === queryParameters["withStories"]) {
-            include.push(Story);
-        }
-    */
+    if ("" === queryParameters["withStories"]) {
+        include.push(Story);
+    }
     if (include.length > 0) {
         options["include"] = include;
     }
@@ -80,14 +83,14 @@ exports.all = async (queryParameters) => {
     let options = appendQueryParameters({
         order: order
     }, queryParameters);
-    return await Series.findAll(options);
+    return await Volume.findAll(options);
 }
 
 exports.find = async (id, queryParameters) => {
     let options = appendQueryParameters({}, queryParameters);
-    let result = await Series.findByPk(id, options);
+    let result = await Volume.findByPk(id, options);
     if (!result) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`id: Missing Volume ${id}`);
     } else {
         return result;
     }
@@ -97,7 +100,7 @@ exports.insert = async (data) => {
     let transaction;
     try {
         transaction = await db.sequelize.transaction();
-        let result = await Series.create(data, {
+        let result = await Volume.create(data, {
             fields: fields,
             transaction: transaction
         });
@@ -116,38 +119,38 @@ exports.insert = async (data) => {
 }
 
 exports.remove = async (id) => {
-    let result = await Series.findByPk(id);
+    let result = await Volume.findByPk(id);
     if (!result) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`id: Missing Volume ${id}`);
     }
-    let num = await Series.destroy({
+    let num = await Volume.destroy({
         where: { id: id }
     });
     if (num !== 1) {
-        throw new NotFound(`id: Cannot remove Series ${id}`);
+        throw new NotFound(`id: Cannot remove Volume ${id}`);
     }
     return result;
 }
 
 exports.update = async (id, data) => {
-    let original = await Series.findByPk(id);
+    let original = await Volume.findByPk(id);
     if (!original) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`id: Missing Volume ${id}`);
     }
     let transaction;
     try {
         transaction = await db.sequelize.transaction();
-        let result = await Series.update(data, {
+        let result = await Volume.update(data, {
             fields: fieldsWithId,
             transaction: transaction,
             where: { id: id }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`id: Cannot update Series ${id}`);
+            throw new BadRequest(`id: Cannot update Volume ${id}`);
         }
         await transaction.commit();
         transaction = null;
-        return await Series.findByPk(id);
+        return await Volume.findByPk(id);
     } catch (err) {
         if (transaction) {
             await transaction.rollback();
@@ -163,49 +166,49 @@ exports.update = async (id, data) => {
 // Model Specific Methods ----------------------------------------------------
 
 exports.authorAdd = async (id, authorId) => {
-    let series = await Series.findByPk(id);
-    if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+    let volume = await Volume.findByPk(id);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
     }
     let author = await Author.findByPk(authorId);
     if (!author) {
         throw new NotFound(`authorId: Missing Author ${authorId}`);
     }
-    if (series.libraryId !== author.libraryId) {
-        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
-            `Library ${series.libraryId} but Author ${authorId} belongs to ` +
+    if (volume.libraryId !== author.libraryId) {
+        throw new BadRequest(`libraryId: Volume ${id} belongs to ` +
+            `Library ${volume.libraryId} but Author ${authorId} belongs to ` +
             `Library ${author.libraryId}`);
     }
-    let count = await AuthorSeries.count({
+    let count = await AuthorVolume.count({
         where: {
             authorId: authorId,
-            seriesId: id
+            volumeId: id
         }
     });
     if (count > 0) {
         throw new BadRequest(`authorId: Author ${authorId} is already ` +
-            `associated with Series ${id}`);
+            `associated with Volume ${id}`);
     }
-    await series.addAuthor(author); // returns instanceof AuthorSeries
+    await volume.addAuthor(author); // returns instanceof AuthorVolume
     return author;
 }
 
-exports.authorAll = async (seriesId, queryParameters) => {
-    let series = await Series.findByPk(seriesId);
-    if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
+exports.authorAll = async (volumeId, queryParameters) => {
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${volumeId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
         order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
     }, queryParameters);
-    return await series.getAuthors(options);
+    return await volume.getAuthors(options);
 }
 
 exports.authorExact = async (id, firstName, lastName, queryParameters) => {
-    let series = await Series.findByPk(seriesId);
-    if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -215,7 +218,7 @@ exports.authorExact = async (id, firstName, lastName, queryParameters) => {
             lastName: lastName,
         }
     }, queryParameters);
-    let results = await series.getAuthors(options);
+    let results = await volume.getAuthors(options);
     if (results.length !== 1) {
         throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
     }
@@ -223,9 +226,9 @@ exports.authorExact = async (id, firstName, lastName, queryParameters) => {
 }
 
 exports.authorName = async (id, name, queryParameters) => {
-    let series = await Series.findByPk(id);
-    if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+    let volume = await Volume.findByPk(id);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -237,16 +240,16 @@ exports.authorName = async (id, name, queryParameters) => {
             }
         }
     }, queryParameters);
-    return await series.getAuthors(options);
+    return await volume.getAuthors(options);
 }
 
 exports.exact = async (name, queryParameters) => {
     let options = appendQueryParameters({
         where: { name: name }
     }, queryParameters);
-    let results = await Series.findAll(options);
+    let results = await Volume.findAll(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Series '${name}'`);
+        throw new NotFound(`name: Missing Volume '${name}'`);
     }
     return results[0];
 }
@@ -258,5 +261,79 @@ exports.name = async (name, queryParameters) => {
             name: { [Op.iLike]: `%${name}%` }
         }
     }, queryParameters);
-    return await Series.findAll(options);
+    return await Volume.findAll(options);
+}
+
+exports.storyAdd = async (id, storyId) => {
+    let volume = await Volume.findByPk(id);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
+    }
+    let story = await Story.findByPk(storyId);
+    if (!story) {
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
+    }
+    if (volume.libraryId !== story.libraryId) {
+        throw new BadRequest(`libraryId: Volume ${id} belongs to ` +
+            `Library ${volume.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${story.libraryId}`);
+    }
+    let count = await VolumeStory.count({
+        where: {
+            storyId: storyId,
+            volumeId: id
+        }
+    });
+    if (count > 0) {
+        throw new BadRequest(`storyId: Story ${storyId} is already ` +
+            `associated with Volume ${id}`);
+    }
+    await volume.addStory(story); // returns instanceof VolumeStory
+    return story;
+}
+
+exports.storyAll = async (volumeId, queryParameters) => {
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${volumeId}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
+    }, queryParameters);
+    return await volume.getStories(options);
+}
+
+exports.storyExact = async (id, name, queryParameters) => {
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
+        where: {
+            name: name
+        }
+    }, queryParameters);
+    let results = await volume.getStories(options);
+    if (results.length !== 1) {
+        throw new NotFound(`name: Missing Story '${name}'`);
+    }
+    return results[0];
+}
+
+exports.storyName = async (id, name, queryParameters) => {
+    let volume = await Volume.findByPk(id);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${id}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
+        where: {
+            name: { [Op.iLike]: `%${name}%` }
+        }
+    }, queryParameters);
+    return await volume.getStories(options);
 }

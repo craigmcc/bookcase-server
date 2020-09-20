@@ -7,156 +7,27 @@ const Author = db.Author;
 const Library = db.Library;
 const LibraryServices = require("../../src/services/LibraryServices");
 const Series = db.Series;
+const Story = db.Story;
+const Volume = db.Volume;
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
+
+const {
+    authorsData0, authorsData1, loadAuthors,
+    librariesData0, librariesData1, loadLibraries,
+    seriesData0, seriesData1, loadSeries,
+    storiesData0, storiesData1, loadStories,
+    volumesData0, volumesData1, loadVolumes
+} = require("../util/SeedData");
+
+const {
+    authorKey, libraryKey, seriesKey, storyKey, volumeKey
+} = require("../util/SortKeys");
 
 // External Modules ----------------------------------------------------------
 
 const chai = require("chai");
 const expect = chai.expect;
-
-// Test Data -----------------------------------------------------------------
-
-// Must be seeded with valid libraryId
-const authorsData0 = {
-    author0Data: {
-        firstName: "Barney",
-        lastName: "Rubble",
-        notes: "Barney Author"
-    },
-    author1Data: {
-        firstName: "Betty",
-        lastName: "Rubble",
-        notes: "Betty Author"
-    },
-    author2Data: {
-        firstName: "Bam Bam",
-        lastName: "Rubble",
-        notes: "Bam Bam Author"
-    }
-}
-
-// Must be seeded with valid libraryId
-const authorsData1 = {
-    author0Data: {
-        firstName: "Fred",
-        lastName: "Flintstone",
-        notes: "Fred Author"
-    },
-    author1Data: {
-        firstName: "Wilma",
-        lastName: "Flintstone",
-        notes: "Wilma Author"
-    },
-    author2Data: {
-        firstName: "Pebbles",
-        lastName: "Flintstone",
-        notes: "Pebbles Author"
-    }
-}
-
-const librariesData = {
-    library0Data: {
-        name: "First Library",
-        notes: "Special Notes about First Library"
-    },
-    library1Data: {
-        name: "Second Library",
-        notes: "Other Notes about Second Library"
-    },
-    library2Data: {
-        name: "Third Library"
-    }
-}
-
-// Must be seeded with valid libraryId
-const seriesData0 = {
-    series0Data: {
-        name: "First Series",
-        notes: "This is the first series"
-    },
-    series1Data: {
-        name: "Second Series",
-        notes: "This is the second series"
-    },
-    series2Data: {
-        name: "Third Series",
-        notes: "This is the third series"
-    }
-}
-
-// Must be seeded with valid libraryId
-const seriesData1 = {
-    series0Data: {
-        name: "Another First Series",
-        notes: "This is the first series again"
-    },
-    series1Data: {
-        name: "Another Second Series",
-        notes: "This is the second series again"
-    },
-    series2Data: {
-        name: "Another Third Series",
-        notes: "This is the third series again"
-    }
-}
-
-// Returns array of created Author objects
-const loadAuthors = async (library, authorsData) => {
-    let data = [
-        authorsData.author0Data,
-        authorsData.author1Data,
-        authorsData.author2Data
-    ]
-    data.forEach(datum => {
-        datum.libraryId = library.id
-    });
-    try {
-        return await Author.bulkCreate(data, {
-            validate: true
-        });
-    } catch (err) {
-        console.error("loadAuthors() error: ", err);
-        throw err;
-    }
-}
-
-// Returns array of created Library objects
-const loadLibraries = async () => {
-    let data = [
-        librariesData.library0Data,
-        librariesData.library1Data,
-        librariesData.library2Data
-    ]
-    try {
-        return await Library.bulkCreate(data, {
-            validate: true
-        });
-    } catch (err) {
-        console.error("loadLibraries() error: ", err);
-        throw err;
-    }
-}
-
-// Returns array of created Series objects
-const loadSeries = async (library, seriesData) => {
-    let data = [
-        seriesData.series0Data,
-        seriesData.series1Data,
-        seriesData.series2Data
-    ]
-    data.forEach(datum => {
-        datum.libraryId = library.id
-    });
-    try {
-        return await Series.bulkCreate(data, {
-            validate: true
-        });
-    } catch (err) {
-        console.error("loadSeries() error: ", err);
-        throw err;
-    }
-}
 
 // LibraryServices Tests -----------------------------------------------------
 
@@ -185,7 +56,7 @@ describe("LibraryServices Tests", () => {
 
             it("should find all objects", async () => {
 
-                await loadLibraries();
+                await loadLibraries(librariesData0);
 
                 let results = await LibraryServices.all();
                 expect(results.length).to.equal(3);
@@ -194,7 +65,7 @@ describe("LibraryServices Tests", () => {
 
             it("should find all objects with includes", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 await loadAuthors(libraryMatch, authorsData0);
 
@@ -218,7 +89,7 @@ describe("LibraryServices Tests", () => {
 
             it("should find some objects with pagination", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
 
                 let results = await LibraryServices.all({
                     offset: 1
@@ -251,31 +122,39 @@ describe("LibraryServices Tests", () => {
                 let invalidId = 9999;
 
                 try {
-                    await LibraryServices.authorAll(invalidId);
+                    await LibraryServices.authorsAll(invalidId);
                     expect.fail("Should have thrown NotFound");
                 } catch (err) {
                     if (!(err instanceof NotFound)) {
                         expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`libraryId: Missing Library ${invalidId}`);
+                        .includes(`id: Missing Library ${invalidId}`);
                 }
 
             })
 
             it("should succeed for all authors for library with", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryFirst = libraries[1].dataValues;
                 let librarySecond = libraries[2].dataValues;
                 await loadAuthors(libraryFirst, authorsData0);
                 await loadAuthors(librarySecond, authorsData1);
 
                 try {
-                    let results = await LibraryServices.authorAll(libraryFirst.id);
+                    let results = await LibraryServices.authorsAll(libraryFirst.id);
                     expect(results.length).to.equal(3);
+                    let previousKey;
                     results.forEach(result => {
                         expect(result.libraryId).to.equal(libraryFirst.id);
+                        let currentKey = authorKey(result);
+                        if (previousKey) {
+                            if (currentKey < previousKey) {
+                                expect.fail(`key: Expected '${currentKey}' >= '${previousKey}'`);
+                            }
+                        }
+                        previousKey = currentKey;
                     })
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
@@ -285,18 +164,26 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed for no authors for library without", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryFirst = libraries[1].dataValues;
                 let librarySecond = libraries[2].dataValues;
                 await loadAuthors(libraryFirst, authorsData0);
 
                 try {
-                    let results = await LibraryServices.authorAll(libraryFirst.id);
+                    let results = await LibraryServices.authorsAll(libraryFirst.id);
                     expect(results.length).to.equal(3);
+                    let previousKey;
                     results.forEach(result => {
                         expect(result.libraryId).to.equal(libraryFirst.id);
+                        let currentKey = authorKey(result);
+                        if (previousKey) {
+                            if (currentKey < previousKey) {
+                                expect.fail(`key: Expected '${currentKey}' >= '${previousKey}'`);
+                            }
+                        }
+                        previousKey = currentKey;
                     })
-                    results = await LibraryServices.authorAll(librarySecond.id);
+                    results = await LibraryServices.authorsAll(librarySecond.id);
                     expect(results.length).to.equal(0);
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
@@ -314,13 +201,13 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let authors = await loadAuthors(libraries[1], authorsData0);
                 let invalidFirstName = "Foo Bar";
                 let invalidLastName = "Baz Bop";
 
                 try {
-                    await LibraryServices.authorExact
+                    await LibraryServices.authorsExact
                     (authors[0].libraryId, invalidFirstName, invalidLastName);
                     expect.fail("Should have thrown NotFound initially");
                 } catch (err) {
@@ -335,13 +222,13 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with valid name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[2].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let authorMatch = authors[1].dataValues;
 
                 try {
-                    let result = await LibraryServices.authorExact
+                    let result = await LibraryServices.authorsExact
                     (libraryMatch.id, authorMatch.firstName, authorMatch.lastName);
                     expect(result.id).to.equal(authorMatch.id);
                 } catch (err) {
@@ -366,7 +253,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid name", async () => {
 
-                await loadLibraries();
+                await loadLibraries(librariesData0);
                 let invalidName = "Foo Bar";
 
                 try {
@@ -384,7 +271,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with valid name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let match = libraries[1];
 
                 try {
@@ -406,7 +293,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                await loadLibraries();
+                await loadLibraries(librariesData0);
                 let invalidId = 9999;
 
                 try {
@@ -424,7 +311,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let match = libraries[1];
 
                 try {
@@ -446,7 +333,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let duplicateNameLibrary = {
                     name: libraries[2].name
                 }
@@ -517,7 +404,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                await loadLibraries();
+                await loadLibraries(librariesData0);
                 let invalidId = 9999;
 
                 try {
@@ -535,7 +422,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let match = libraries[1];
 
                 try {
@@ -570,14 +457,14 @@ describe("LibraryServices Tests", () => {
                         expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`libraryId: Missing Library ${invalidId}`);
+                        .includes(`id: Missing Library ${invalidId}`);
                 }
 
             })
 
             it("should succeed for all series for library with", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryFirst = libraries[1].dataValues;
                 let librarySecond = libraries[2].dataValues;
                 await loadSeries(libraryFirst, seriesData0);
@@ -587,8 +474,16 @@ describe("LibraryServices Tests", () => {
                     let results = await LibraryServices.seriesAll
                         (libraryFirst.id);
                     expect(results.length).to.equal(3);
+                    let previousKey;
                     results.forEach(result => {
                         expect(result.libraryId).to.equal(libraryFirst.id);
+                        let currentKey = seriesKey(result);
+                        if (previousKey) {
+                            if (currentKey < previousKey) {
+                                expect.fail(`key: Expected '${currentKey}' >= '${previousKey}'`);
+                            }
+                        }
+                        previousKey = currentKey;
                     })
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
@@ -596,9 +491,9 @@ describe("LibraryServices Tests", () => {
 
             })
 
-            it("should succeed for no authors for library without", async () => {
+            it("should succeed for no series for library without", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryFirst = libraries[1].dataValues;
                 let librarySecond = libraries[2].dataValues;
                 await loadSeries(libraryFirst, seriesData0);
@@ -607,8 +502,16 @@ describe("LibraryServices Tests", () => {
                     let results = await LibraryServices.seriesAll
                         (libraryFirst.id);
                     expect(results.length).to.equal(3);
+                    let previousKey;
                     results.forEach(result => {
                         expect(result.libraryId).to.equal(libraryFirst.id);
+                        let currentKey = seriesKey(result);
+                        if (previousKey) {
+                            if (currentKey < previousKey) {
+                                expect.fail(`key: Expected '${currentKey}' >= '${previousKey}'`);
+                            }
+                        }
+                        previousKey = currentKey;
                     })
                     results = await LibraryServices.seriesAll(librarySecond.id);
                     expect(results.length).to.equal(0);
@@ -628,7 +531,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 let series = await loadSeries(libraryMatch, seriesData0);
                 let invalidName = "Foo Bar";
@@ -649,7 +552,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with valid name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[2];
                 let series = await loadSeries(libraryMatch, seriesData0);
                 let seriesMatch = series[1];
@@ -681,7 +584,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let invalidData = {
                     ...libraries[0].dataValues,
                     name: libraries[1].dataValues.name,
@@ -702,7 +605,7 @@ describe("LibraryServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let invalidData = {
                     ...libraries[0].dataValues,
                     notes: "Updated notes for invalid id change",
@@ -728,7 +631,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with no change", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let validData = {
                     ...libraries[2].dataValues
                 }
@@ -746,7 +649,7 @@ describe("LibraryServices Tests", () => {
 
             it("should succeed with other field change", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let validData = {
                     ...libraries[2].dataValues,
                     name: "Brand New Name"

@@ -87,9 +87,9 @@ module.exports = (sequelize) => {
 
         Library.hasMany(Series);
 
-//        Library.hasMany(Story);
+        Library.hasMany(Story);
 
-//        Library.hasMany(Volume);
+        Library.hasMany(Volume);
 
     }
 

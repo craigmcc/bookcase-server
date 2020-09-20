@@ -54,6 +54,29 @@ module.exports = (sequelize) => {
             }
         },
 
+        location: {
+            allowNull: true,
+            type: DataTypes.STRING,
+        },
+
+        media: {
+            allowNull: true,
+            type: DataTypes.STRING,
+            validate: {
+                isValidValue: function(value, next) {
+                    if (value) {
+                        if (validMediaValues.includes(value)) {
+                            next();
+                        } else {
+                            next(`media: Value '${value}' is not one of ${validMediaValues}`);
+                        }
+                    } else {
+                        next();
+                    }
+                }
+            }
+        },
+
         name: {
             allowNull: false,
             type: DataTypes.STRING,
@@ -104,6 +127,13 @@ module.exports = (sequelize) => {
         sequelize
 
     });
+
+    let validMediaValues = [
+        "Book",
+        "Kindle",
+        "Kobo",
+        "PDF"
+    ];
 
     // Volume Associations ---------------------------------------------------
 
