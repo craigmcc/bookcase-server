@@ -9,101 +9,19 @@ const Library = db.Library;
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
+const {
+    authorsData0, authorsData1, loadAuthors,
+    librariesData0, librariesData1, loadLibraries
+} = require("../util/SeedData");
+
+const {
+    authorKey, libraryKey
+} = require("../util/SortKeys");
+
 // External Modules ----------------------------------------------------------
 
 const chai = require("chai");
 const expect = chai.expect;
-
-// Test Data -----------------------------------------------------------------
-
-// Must be seeded with valid libraryId
-const authorsData0 = {
-    author0Data: {
-        firstName: "Barney",
-        lastName: "Rubble",
-        notes: "Barney Author"
-    },
-    author1Data: {
-        firstName: "Betty",
-        lastName: "Rubble",
-        notes: "Betty Author"
-    },
-    author2Data: {
-        firstName: "Bam Bam",
-        lastName: "Rubble",
-        notes: "Bam Bam Author"
-    }
-}
-
-// Must be seeded with valid libraryId
-const authorsData1 = {
-    author0Data: {
-        firstName: "Fred",
-        lastName: "Flintstone",
-        notes: "Fred Author"
-    },
-    author1Data: {
-        firstName: "Wilma",
-        lastName: "Flintstone",
-        notes: "Wilma Author"
-    },
-    author2Data: {
-        firstName: "Pebbles",
-        lastName: "Flintstone",
-        notes: "Pebbles Author"
-    }
-}
-
-const librariesData = {
-    library0Data: {
-        name: "First Library",
-        notes: "Special Notes about First Library"
-    },
-    library1Data: {
-        name: "Second Library",
-        notes: "Other Notes about Second Library"
-    },
-    library2Data: {
-        name: "Third Library"
-    }
-}
-
-// Returns array of created Author objects
-const loadAuthors = async (library, authorsData) => {
-    let data = [
-        authorsData.author0Data,
-        authorsData.author1Data,
-        authorsData.author2Data
-    ]
-    data.forEach(datum => {
-        datum.libraryId = library.id
-    });
-    try {
-        return await Author.bulkCreate(data, {
-            validate: true
-        });
-    } catch (err) {
-        console.error("loadAuthors() error: ", err);
-        throw err;
-    }
-}
-
-// Returns array of created Library objects
-const loadLibraries = async () => {
-    let data = [
-        librariesData.library0Data,
-        librariesData.library1Data,
-        librariesData.library2Data
-    ]
-    try {
-        return await Library.bulkCreate(data, {
-            validate: true
-        });
-    } catch (err) {
-        console.error("loadLibraries() error: ", err);
-        throw err;
-    }
-}
 
 // AuthorServices Tests ------------------------------------------------------
 
@@ -139,45 +57,67 @@ describe("AuthorServices Tests", () => {
 
             it("should find all objects", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[0].dataValues;
                 await loadAuthors(libraryMatch, authorsData0);
 
-                let results = await AuthorServices.all();
-                expect(results.length).to.equal(3);
+                try {
+                    let results = await AuthorServices.all();
+                    expect(results.length).to.equal(3);
+                    let previousKey;
+                    results.forEach(result => {
+                        let currentKey = authorKey(result);
+                        if (previousKey) {
+                            if (currentKey < previousKey) {
+                                expect.fail(`key: Expected '${currentKey}' >= '${previousKey}'`);
+                            }
+                        }
+                        previousKey = currentKey;
+                    })
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
 
             })
 
             it("should find all objects with includes", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 await loadAuthors(libraryMatch, authorsData0);
 
-                let results = await AuthorServices.all({
-                    withLibrary: ""
-                });
-                expect(results.length).to.equal(3);
-                results.forEach(author => {
-                    if (author.library) {
-                        expect(author.library.id).to.equal(libraryMatch.id);
-                    } else {
-                        expect.fail("Should have included library");
-                    }
-                })
+                try {
+                    let results = await AuthorServices.all({
+                        withLibrary: ""
+                    });
+                    expect(results.length).to.equal(3);
+                    results.forEach(author => {
+                        if (author.library) {
+                            expect(author.library.id).to.equal(libraryMatch.id);
+                        } else {
+                            expect.fail("Should have included library");
+                        }
+                    })
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
 
             })
 
             it("should find some objects with pagination", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[0].dataValues;
                 await loadAuthors(libraryMatch, authorsData0);
 
-                let results = await AuthorServices.all({
-                    offset: 1
-                });
-                expect(results.length).to.equal(2);
+                try {
+                    let results = await AuthorServices.all({
+                        offset: 1
+                    });
+                    expect(results.length).to.equal(2);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
 
             })
 
@@ -187,8 +127,12 @@ describe("AuthorServices Tests", () => {
 
             it("should find no objects", async () => {
 
-                let results = await AuthorServices.all();
-                expect(results.length).to.equal(0);
+                try {
+                    let results = await AuthorServices.all();
+                    expect(results.length).to.equal(0);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
 
             });
 
@@ -202,7 +146,7 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let authors = await loadAuthors(libraries[0], authorsData0);
                 let invalidId = 9999;
 
@@ -211,7 +155,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown NotFound initially");
                 } catch (err) {
                     if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown NotFound for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes(`id: Missing Author ${invalidId}`);
@@ -221,7 +165,7 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let authorMatch = authors[2].dataValues;
@@ -245,7 +189,7 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[2].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let duplicateNameAuthor = {
@@ -259,7 +203,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}`);
                     }
                     expect(err.message)
                         .includes(`name: Name '${duplicateNameAuthor.firstName} ${duplicateNameAuthor.lastName}' ` +
@@ -271,7 +215,7 @@ describe("AuthorServices Tests", () => {
             it("should fail with invalid libraryId", async () => {
 
                 let invalidAuthor = {
-                    ...authorsData0.author0Data,
+                    ...authorsData0[0],
                     libraryId: 9999
                 }
 
@@ -280,7 +224,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes(`libraryId: Missing Library ${invalidAuthor.libraryId}`);
@@ -290,9 +234,9 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with missing firstName", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let invalidAuthor = {
-                    ...authorsData0.author1Data,
+                    ...authorsData0[1],
                     firstName: null,
                     libraryId: libraries[0].id
                 }
@@ -302,7 +246,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes("firstName: Is required");
@@ -312,9 +256,9 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with missing lastName", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let invalidAuthor = {
-                    ...authorsData0.author2Data,
+                    ...authorsData0[2],
                     lastName: null,
                     libraryId: libraries[1].id
                 }
@@ -324,7 +268,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes("lastName: Is required");
@@ -334,9 +278,9 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with missing libraryId", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let invalidAuthor = {
-                    ...authorsData0.author0Data,
+                    ...authorsData0[0],
                     libraryId: null
                 }
 
@@ -345,7 +289,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes("libraryId: Is required");
@@ -359,10 +303,10 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid arguments", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[2].dataValues;
                 let validAuthor = {
-                    ...authorsData0.author2Data,
+                    ...authorsData0[2],
                     firstName: "Sister",
                     libraryId: libraryMatch.id
                 }
@@ -394,7 +338,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown NotFound initially");
                 } catch (err) {
                     if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown NotFound for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes(`id: Missing Author ${invalidId}`);
@@ -404,7 +348,7 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let authorMatch = authors[0].dataValues;
@@ -432,7 +376,7 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let invalidData = {
@@ -446,7 +390,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown BadRequest initially");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
-                        expect.fail(`Should have thrown BadRequest for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes(`name: Name '${invalidData.firstName} ${invalidData.lastName}' ` +
@@ -457,7 +401,7 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[0].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let invalidId = 9999;
@@ -471,7 +415,7 @@ describe("AuthorServices Tests", () => {
                     expect.fail("Should have thrown NotFound initially");
                 } catch (err) {
                     if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown NotFound for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
                         .includes(`id: Missing Author ${invalidId}`);
@@ -485,7 +429,7 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with no change", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[1].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let validData = {
@@ -506,7 +450,7 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with other field change", async () => {
 
-                let libraries = await loadLibraries();
+                let libraries = await loadLibraries(librariesData0);
                 let libraryMatch = libraries[2].dataValues;
                 let authors = await loadAuthors(libraryMatch, authorsData0);
                 let validData = {

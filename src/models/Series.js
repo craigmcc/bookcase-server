@@ -121,7 +121,7 @@ module.exports = (sequelize) => {
             }
         });
 
-//        Series.belongsToMany(Story, { through: SeriesStory });
+        Series.belongsToMany(Story, { through: SeriesStory });
 
     }
 

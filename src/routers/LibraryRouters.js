@@ -14,7 +14,7 @@ const router = require("express").Router();
 
 module.exports = (app) => {
 
-    // Model Specific Endpoints (no :id) -------------------------------------
+    // Model Specific Endpoints (no :libraryId) -------------------------------------
 
     // GET /exact/:name - Find Library by exact name
     router.get("/exact/:name", async (req, res) => {
@@ -58,56 +58,56 @@ module.exports = (app) => {
         }
     })
 
-    // DELETE /:id - Remove Library by ID
-    router.delete("/:id", async (req, res) => {
+    // DELETE /:libraryId - Remove Library by ID
+    router.delete("/:libraryId", async (req, res) => {
         try {
-            res.send(await LibraryServices.remove(req.params.id));
+            res.send(await LibraryServices.remove(req.params.libraryId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.remove()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id - Find Library by ID
-    router.get("/:id", async (req, res) => {
+    // GET /:libraryId - Find Library by ID
+    router.get("/:libraryId", async (req, res) => {
         try {
-            res.send(await LibraryServices.find(req.params.id, req.query));
+            res.send(await LibraryServices.find(req.params.libraryId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.find()");
             res.status(status).send(message);
         }
     })
 
-    // PUT /:id - Update Library by ID
-    router.put("/:id", async (req, res) => {
+    // PUT /:libraryId - Update Library by ID
+    router.put("/:libraryId", async (req, res) => {
         try {
-            res.send(await LibraryServices.update(req.params.id, req.body));
+            res.send(await LibraryServices.update(req.params.libraryId, req.body));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.update()");
             res.status(status).send(message);
         }
     })
 
-    // Model Specific Endpoints (with :id) -----------------------------------
+    // Model Specific Endpoints (with :libraryId) -----------------------------------
 
     // ***** Library-Author Relationships (One:Many) *****
 
-    // GET /:id/authors - Find Authors by Library ID
-    router.get("/:id/authors", async (req, res) => {
+    // GET /:libraryId/authors - Find Authors by Library ID
+    router.get("/:libraryId/authors", async (req, res) => {
         try {
-            res.send(await LibraryServices.authorsAll(req.params.id, req.query));
+            res.send(await LibraryServices.authorAll(req.params.libraryId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorAll()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/authors/exact/:firstName/:lastName
+    // GET /:libraryId/authors/exact/:firstName/:lastName
     //   - Find Author by Library ID and exact names
-    router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
+    router.get("/:libraryId/authors/exact/:firstName/:lastName", async (req, res) => {
         try {
-            res.send(await LibraryServices.authorsExact
-                (req.params.id, req.params.firstName, req.params.lastName, req.query));
+            res.send(await LibraryServices.authorExact
+                (req.params.libraryId, req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorExact()");
             res.status(status).send(message);
@@ -115,11 +115,11 @@ module.exports = (app) => {
     })
 
 
-    // GET /:id/authors/name/:name - Find Authors by Library ID and name segment
-    router.get("/:id/authors/name/:name", async (req, res) => {
+    // GET /:libraryId/authors/name/:name - Find Authors by Library ID and name segment
+    router.get("/:libraryId/authors/name/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.authorsName
-                    (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.authorName
+                    (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorName()");
             res.status(status).send(message);
@@ -128,33 +128,33 @@ module.exports = (app) => {
 
     // ***** Library-Series Relationships (One:Many) *****
 
-    // GET /:id/series - Find Series by Library ID
-    router.get("/:id/series", async (req, res) => {
+    // GET /:libraryId/series - Find Series by Library ID
+    router.get("/:libraryId/series", async (req, res) => {
         try {
             res.send(await LibraryServices.seriesAll
-                (req.params.id, req.query));
+                (req.params.libraryId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesAll()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/series/exact/:name - Find Series by Library ID and exact name
-    router.get("/:id/series/exact/:name", async (req, res) => {
+    // GET /:libraryId/series/exact/:name - Find Series by Library ID and exact name
+    router.get("/:libraryId/series/exact/:name", async (req, res) => {
         try {
             res.send(await LibraryServices.seriesExact
-                (req.params.id, req.params.name, req.query));
+                (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesExact()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/series/name/:name - Find Series by Library ID and name segment
-    router.get("/:id/series/name/:name", async (req, res) => {
+    // GET /:libraryId/series/name/:name - Find Series by Library ID and name segment
+    router.get("/:libraryId/series/name/:name", async (req, res) => {
         try {
             res.send(await LibraryServices.seriesName
-            (req.params.id, req.params.name, req.query));
+            (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesName()");
             res.status(status).send(message);
@@ -163,33 +163,33 @@ module.exports = (app) => {
 
     // ***** Library-Story Relationships (One:Many) *****
 
-    // GET /:id/stories - Find Stories by Library ID
-    router.get("/:id/stories", async (req, res) => {
+    // GET /:libraryId/stories - Find Stories by Library ID
+    router.get("/:libraryId/stories", async (req, res) => {
         try {
-            res.send(await LibraryServices.storiesAll
-            (req.params.id, req.query));
+            res.send(await LibraryServices.storyAll
+            (req.params.libraryId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.storiesAll()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/stories/exact/:name - Find Story by Library ID and exact name
-    router.get("/:id/stories/exact/:name", async (req, res) => {
+    // GET /:libraryId/stories/exact/:name - Find Story by Library ID and exact name
+    router.get("/:libraryId/stories/exact/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.storiesExact
-            (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.storyExact
+            (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.storiesExact()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/stories/name/:name - Find Stories by Library ID and name segment
-    router.get("/:id/volumes/name/:name", async (req, res) => {
+    // GET /:libraryId/stories/name/:name - Find Stories by Library ID and name segment
+    router.get("/:libraryId/volumes/name/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.storiesName
-            (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.storyName
+            (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesName()");
             res.status(status).send(message);
@@ -198,33 +198,33 @@ module.exports = (app) => {
 
     // ***** Library-Volume Relationships (One:Many) *****
 
-    // GET /:id/volumes - Find Volume by Library ID
-    router.get("/:id/volumes", async (req, res) => {
+    // GET /:libraryId/volumes - Find Volume by Library ID
+    router.get("/:libraryId/volumes", async (req, res) => {
         try {
-            res.send(await LibraryServices.volumesAll
-            (req.params.id, req.query));
+            res.send(await LibraryServices.volumeAll
+            (req.params.libraryId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesAll()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/volumes/exact/:name - Find Volume by Library ID and exact name
-    router.get("/:id/volumes/exact/:name", async (req, res) => {
+    // GET /:libraryId/volumes/exact/:name - Find Volume by Library ID and exact name
+    router.get("/:libraryId/volumes/exact/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.volumesExact
-            (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.volumeExact
+            (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesExact()");
             res.status(status).send(message);
         }
     })
 
-    // GET /:id/volumes/name/:name - Find Volume by Library ID and name segment
-    router.get("/:id/volumes/name/:name", async (req, res) => {
+    // GET /:libraryId/volumes/name/:name - Find Volume by Library ID and name segment
+    router.get("/:libraryId/volumes/name/:name", async (req, res) => {
         try {
-            res.send(await LibraryServices.volumesName
-            (req.params.id, req.params.name, req.query));
+            res.send(await LibraryServices.volumeName
+            (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesName()");
             res.status(status).send(message);

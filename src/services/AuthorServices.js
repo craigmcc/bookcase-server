@@ -347,6 +347,34 @@ exports.storyName = async (id, name, queryParameters) => {
     return await author.getVolumes(options);
 }
 
+exports.storyRemove = async (id, storyId) => {
+    let author = await Author.findByPk(id);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${id}`);
+    }
+    let story = await Story.findByPk(storyId);
+    if (!story) {
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
+    }
+    if (author.libraryId !== story.libraryId) {
+        throw new BadRequest(`libraryId: Author ${id} belongs to ` +
+            `Library ${author.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${story.libraryId}`);
+    }
+    let count = await AuthorSeries.count({
+        where: {
+            authorId: id,
+            storyId: storyId,
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`storyId: Story ${storyId} is not ` +
+            `associated with Author ${id}`);
+    }
+    await author.removeStory(story); // returns instanceof AuthorSeries
+    return story;
+}
+
 // ***** Author-Volume Relationships *****
 
 exports.volumeAdd = async (id, volumeId) => {
@@ -421,4 +449,32 @@ exports.volumeName = async (id, name, queryParameters) => {
         }
     }, queryParameters);
     return await author.getVolumes(options);
+}
+
+exports.volumeRemove = async (id, volumeId) => {
+    let author = await Author.findByPk(id);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${id}`);
+    }
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`volumeId: Missing Volume ${volumeId}`);
+    }
+    if (author.libraryId !== volume.libraryId) {
+        throw new BadRequest(`libraryId: Author ${id} belongs to ` +
+            `Library ${author.libraryId} but Volume ${volumeId} belongs to ` +
+            `Library ${volume.libraryId}`);
+    }
+    let count = await AuthorSeries.count({
+        where: {
+            authorId: id,
+            volumeId: volumeId,
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`volumeId: Volume ${volumeId} is not ` +
+            `associated with Author ${id}`);
+    }
+    await author.removeVolume(volume); // returns instanceof AuthorVolume
+    return volume;
 }

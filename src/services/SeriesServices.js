@@ -162,6 +162,31 @@ exports.update = async (id, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
+// ***** Series Name Lookups *****
+
+exports.exact = async (name, queryParameters) => {
+    let options = appendQueryParameters({
+        where: { name: name }
+    }, queryParameters);
+    let results = await Series.findAll(options);
+    if (results.length !== 1) {
+        throw new NotFound(`name: Missing Series '${name}'`);
+    }
+    return results[0];
+}
+
+exports.name = async (name, queryParameters) => {
+    let options = appendQueryParameters({
+        order: order,
+        where: {
+            name: { [Op.iLike]: `%${name}%` }
+        }
+    }, queryParameters);
+    return await Series.findAll(options);
+}
+
+// ***** Series-Author Relationships (Many:Many) *****
+
 exports.authorAdd = async (id, authorId) => {
     let series = await Series.findByPk(id);
     if (!series) {
@@ -240,23 +265,138 @@ exports.authorName = async (id, name, queryParameters) => {
     return await series.getAuthors(options);
 }
 
-exports.exact = async (name, queryParameters) => {
+exports.authorRemove = async (id, authorId) => {
+    let series = await Series.findByPk(id);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${id}`);
+    }
+    let author = await Author.findByPk(authorId);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${authorId}`);
+    }
+    if (series.libraryId !== author.libraryId) {
+        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+            `Library ${series.libraryId} but Author ${authorId} belongs to ` +
+            `Library ${author.libraryId}`);
+    }
+    let count = await AuthorSeries.count({
+        where: {
+            authorId: authorId,
+            seriesId: id
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`authorId: Author ${authorId} is not ` +
+            `associated with Series ${id}`);
+    }
+    await series.removeAuthor(author); // returns instanceof AuthorSeries
+    return author;
+}
+
+// ***** Series-Story Relationships (Many:Many) *****
+
+exports.storyAdd = async (id, storyId) => {
+    let series = await Series.findByPk(id);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${id}`);
+    }
+    let story = await Story.findByPk(storyId);
+    if (!story) {
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
+    }
+    if (series.libraryId !== story.libraryId) {
+        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+            `Library ${series.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${story.libraryId}`);
+    }
+    let count = await StorySeries.count({
+        where: {
+            storyId: storyId,
+            seriesId: id
+        }
+    });
+    if (count > 0) {
+        throw new BadRequest(`storyId: Story ${storyId} is already ` +
+            `associated with Series ${id}`);
+    }
+    await series.addStory(story); // returns instanceof StorySeries
+    return story;
+}
+
+exports.storyAll = async (seriesId, queryParameters) => {
+    let series = await Series.findByPk(seriesId);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
+    }
     let options = appendQueryParameters({
-        where: { name: name }
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
     }, queryParameters);
-    let results = await Series.findAll(options);
+    return await series.getStorys(options);
+}
+
+exports.storyExact = async (id, firstName, lastName, queryParameters) => {
+    let series = await Series.findByPk(seriesId);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${id}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        where: {
+            firstName: firstName,
+            lastName: lastName,
+        }
+    }, queryParameters);
+    let results = await series.getStorys(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Series '${name}'`);
+        throw new NotFound(`name: Missing Story '${firstName} ${lastName}'`);
     }
     return results[0];
 }
 
-exports.name = async (name, queryParameters) => {
+exports.storyName = async (id, name, queryParameters) => {
+    let series = await Series.findByPk(id);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${id}`);
+    }
     let options = appendQueryParameters({
-        order: order,
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
         where: {
-            name: { [Op.iLike]: `%${name}%` }
+            [Op.or]: {
+                firstName: {[Op.iLike]: `%${name}%`},
+                lastName: {[Op.iLike]: `%${name}%`}
+            }
         }
     }, queryParameters);
-    return await Series.findAll(options);
+    return await series.getStorys(options);
+}
+
+exports.storyRemove = async (id, storyId) => {
+    let series = await Series.findByPk(id);
+    if (!series) {
+        throw new NotFound(`seriesId: Missing Series ${id}`);
+    }
+    let story = await Story.findByPk(storyId);
+    if (!story) {
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
+    }
+    if (series.libraryId !== story.libraryId) {
+        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+            `Library ${series.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${story.libraryId}`);
+    }
+    let count = await StorySeries.count({
+        where: {
+            storyId: storyId,
+            seriesId: id
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`storyId: Story ${storyId} is not ` +
+            `associated with Series ${id}`);
+    }
+    await series.removeStory(story); // returns instanceof AuthorSeries
+    return story;
 }

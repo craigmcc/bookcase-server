@@ -15,7 +15,7 @@ module.exports.seriesKey = (series) => {
 }
 
 module.exports.storyKey = (story) => {
-    return "|" + series.libraryId + "|" + series.storyKey + "|" + story.name;
+    return "|" + story.libraryId + "|" + story.name;
 }
 
 module.exports.volumeKey = (volume) => {

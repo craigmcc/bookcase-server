@@ -81,11 +81,11 @@ exports.all = async (queryParameters) => {
     return await Library.findAll(options);
 }
 
-exports.find = async (id, queryParameters) => {
+exports.find = async (libraryId, queryParameters) => {
     let options = appendQueryParameters({}, queryParameters);
-    let result = await Library.findByPk(id, options);
+    let result = await Library.findByPk(libraryId, options);
     if (!result) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     } else {
         return result;
     }
@@ -113,24 +113,24 @@ exports.insert = async (data) => {
     }
 }
 
-exports.remove = async (id) => {
-    let result = await Library.findByPk(id);
+exports.remove = async (libraryId) => {
+    let result = await Library.findByPk(libraryId);
     if (!result) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let num = await Library.destroy({
-        where: { id: id }
+        where: { id: libraryId }
     });
     if (num !== 1) {
-        throw new NotFound(`id: Cannot remove Library ${id}`);
+        throw new NotFound(`libraryId: Cannot remove Library ${libraryId}`);
     }
     return result;
 }
 
-exports.update = async (id, data) => {
-    let original = await Library.findByPk(id);
+exports.update = async (libraryId, data) => {
+    let original = await Library.findByPk(libraryId);
     if (!original) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let transaction;
     try {
@@ -138,14 +138,14 @@ exports.update = async (id, data) => {
         let result = await Library.update(data, {
             fields: fieldsWithId,
             transaction: transaction,
-            where: { id: id }
+            where: { id: libraryId }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`id: Cannot update Library ${id}`);
+            throw new BadRequest(`libraryId: Cannot update Library ${libraryId}`);
         }
         await transaction.commit();
         transaction = null;
-        return await Library.findByPk(id);
+        return await Library.findByPk(libraryId);
     } catch (err) {
         if (transaction) {
             await transaction.rollback();
@@ -159,58 +159,6 @@ exports.update = async (id, data) => {
 }
 
 // Model Specific Methods ----------------------------------------------------
-
-// ***** Library-Author Relationships (One:Many) *****
-
-exports.authorsAll = async (id, queryParameters) => {
-    let library = await Library.findByPk(id);
-    if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
-    }
-    let options = appendQueryParameters({
-        joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ]
-    }, queryParameters);
-    return await library.getAuthors(options);
-}
-
-exports.authorsExact = async (id, firstName, lastName, queryParameters) => {
-    let library = await Library.findByPk(id);
-    if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
-    }
-    let options = appendQueryParameters({
-        joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
-        where: {
-            firstName: firstName,
-            lastName: lastName,
-        }
-    }, queryParameters);
-    let results = await library.getAuthors(options);
-    if (results.length !== 1) {
-        throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
-    }
-    return results[0];
-}
-
-exports.authorsName = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
-    if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
-    }
-    let options = appendQueryParameters({
-        joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
-        where: {
-            [Op.or]: {
-                firstName: {[Op.iLike]: `%${name}%`},
-                lastName: {[Op.iLike]: `%${name}%`}
-            }
-        }
-    }, queryParameters);
-    return await library.getAuthors(options);
-}
 
 // ***** Library Name Lookups *****
 
@@ -235,12 +183,64 @@ exports.name = async (name, queryParameters) => {
     return await Library.findAll(options);
 }
 
+// ***** Library-Author Relationships (One:Many) *****
+
+exports.authorAll = async (libraryId, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ]
+    }, queryParameters);
+    return await library.getAuthors(options);
+}
+
+exports.authorExact = async (libraryId, firstName, lastName, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        where: {
+            firstName: firstName,
+            lastName: lastName,
+        }
+    }, queryParameters);
+    let results = await library.getAuthors(options);
+    if (results.length !== 1) {
+        throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
+    }
+    return results[0];
+}
+
+exports.authorName = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
+    if (!library) {
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
+    }
+    let options = appendQueryParameters({
+        joinTableAttributes: [ ], // attribute names from join table
+        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        where: {
+            [Op.or]: {
+                firstName: {[Op.iLike]: `%${name}%`},
+                lastName: {[Op.iLike]: `%${name}%`}
+            }
+        }
+    }, queryParameters);
+    return await library.getAuthors(options);
+}
+
 // ***** Library-Series Relationships (One:Many) *****
 
-exports.seriesAll = async (id, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.seriesAll = async (libraryId, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -249,10 +249,10 @@ exports.seriesAll = async (id, queryParameters) => {
     return await library.getSeries(options);
 }
 
-exports.seriesExact = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.seriesExact = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         where: {
@@ -266,10 +266,10 @@ exports.seriesExact = async (id, name, queryParameters) => {
     return results[0];
 }
 
-exports.seriesName = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.seriesName = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         order: [ ["name", "ASC" ]],
@@ -282,10 +282,10 @@ exports.seriesName = async (id, name, queryParameters) => {
 
 // ***** Library-Story Relationships (One:Many) *****
 
-exports.storiesAll = async (id, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.storyAll = async (libraryId, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -294,10 +294,10 @@ exports.storiesAll = async (id, queryParameters) => {
     return await library.getStories(options);
 }
 
-exports.storiesExact = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.storyExact = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         where: {
@@ -311,10 +311,10 @@ exports.storiesExact = async (id, name, queryParameters) => {
     return results[0];
 }
 
-exports.storiesName = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.storyName = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         order: [ ["name", "ASC" ]],
@@ -327,10 +327,10 @@ exports.storiesName = async (id, name, queryParameters) => {
 
 // ***** Library-Volume Relationships (One:Many) *****
 
-exports.volumesAll = async (id, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.volumeAll = async (libraryId, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -339,10 +339,10 @@ exports.volumesAll = async (id, queryParameters) => {
     return await library.getVolumes(options);
 }
 
-exports.volumesExact = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.volumeExact = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         where: {
@@ -356,10 +356,10 @@ exports.volumesExact = async (id, name, queryParameters) => {
     return results[0];
 }
 
-exports.volumesName = async (id, name, queryParameters) => {
-    let library = await Library.findByPk(id);
+exports.volumeName = async (libraryId, name, queryParameters) => {
+    let library = await Library.findByPk(libraryId);
     if (!library) {
-        throw new NotFound(`id: Missing Library ${id}`);
+        throw new NotFound(`libraryId: Missing Library ${libraryId}`);
     }
     let options = appendQueryParameters({
         order: [ ["name", "ASC" ]],

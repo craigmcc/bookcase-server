@@ -14,29 +14,6 @@ const router = require("express").Router();
 
 module.exports = (app) => {
 
-    // Model Specific Endpoints (no id) --------------------------------------
-
-    // GET /exact/:name - Find Author by exact name
-    router.get("/exact/:firstName/:lastName", async (req, res) => {
-        try {
-            res.send(await AuthorServices.exact
-            (req.params.firstName, req.params.lastName, req.query));
-        } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.exact()");
-            res.status(status).send(message);
-        }
-    })
-
-    // GET /name/:name - Find Author objects by name segment match
-    router.get("/name/:name", async (req, res) => {
-        try {
-            res.send(await AuthorServices.name(req.params.name, req.query));
-        } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.name()");
-            res.status(status).send(message);
-        }
-    })
-
     // Standard CRUD Endpoints -----------------------------------------------
 
     // GET / - Find all Author objects
@@ -59,8 +36,8 @@ module.exports = (app) => {
         }
     })
 
-    // DELETE /:id - Remove Author by ID
-    router.delete("/:id", async (req, res) => {
+    // DELETE /:authorId - Remove Author by ID
+    router.delete("/:authorId", async (req, res) => {
         try {
             res.send(await AuthorServices.remove(req.params.id));
         } catch (err) {
@@ -69,8 +46,8 @@ module.exports = (app) => {
         }
     })
 
-    // GET /:id - Find Author by ID
-    router.get("/:id", async (req, res) => {
+    // GET /:authorId - Find Author by ID
+    router.get("/:authorId", async (req, res) => {
         try {
             res.send(await AuthorServices.find(req.params.id, req.query));
         } catch (err) {
@@ -79,8 +56,8 @@ module.exports = (app) => {
         }
     })
 
-    // PUT /:id - Update Author by ID
-    router.put("/:id", async (req, res) => {
+    // PUT /:authorId - Update Author by ID
+    router.put("/:authorId", async (req, res) => {
         try {
             res.send(await AuthorServices.update(req.params.id, req.body));
         } catch (err) {
@@ -91,8 +68,10 @@ module.exports = (app) => {
 
     // Model Specific Endpoints ----------------------------------------------
 
-    // GET /:id/series - Find Series by Author ID
-    router.get("/:id/series", async (req, res) => {
+    // ***** Author-Series Relationships (Many:Many)
+
+    // GET /:authorId/series - Find Series by Author ID
+    router.get("/:authorId/series", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesAll
                 (req.params.id, req.query));
@@ -102,8 +81,8 @@ module.exports = (app) => {
         }
     })
 
-    // GET /:id/series/exact/:name - Find Series by Author ID and exact name
-    router.get("/:id/series/exact/:name", async (req, res) => {
+    // GET /:authorId/series/exact/:name - Find Series by Author ID and exact name
+    router.get("/:authorId/series/exact/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesExact
                 (req.params.id, req.params.name, req.query));
@@ -113,14 +92,127 @@ module.exports = (app) => {
         }
     })
 
-
-    // GET /:id/series/name/:name - Find Series by Author ID and name segment
-    router.get("/:id/series/name/:name", async (req, res) => {
+    // GET /:authorId/series/name/:name - Find Series by Author ID and name segment
+    router.get("/:authorId/series/name/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesName
                 (req.params.id, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesName()");
+            res.status(status).send(message);
+        }
+    })
+
+    // ***** Author-Story Relationships (Many:Many)
+
+    // GET /:authorId/stories - Find Story objects by Author ID
+    router.get("/:authorId/stories", async (req, res) => {
+        try {
+            res.send(await AuthorServices.storyAll
+            (req.params.id, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyAll()");
+            res.status(status).send(message);
+        }
+    })
+
+    // DELETE /:authorId/stories/:storyId - Remove Story from this Author
+    router.delete("/:authorId/stories/:storyId", async (req, res) => {
+        try {
+            res.send(await AuthorServices.storyRemove
+            (req.params.id, req.params.storyId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // POST /:authorId/stories/:seriesId - Add Story to this Author
+    router.post("/:authorId/stories/:storyId", async (req, res) => {
+        try {
+            res.send(await AuthorServices.storyAdd
+            (req.params.id, req.params.seriesId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:authorId/stories/exact/:name - Find Story by Author ID and exact name
+    router.get("/:authorId/stories/exact/:name", async (req, res) => {
+        try {
+            res.send(await AuthorServices.storyExact
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyExact()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:authorId/stories/name/:name - Find Story by Author ID and name segment
+    router.get("/:authorId/stories/name/:name", async (req, res) => {
+        try {
+            res.send(await AuthorServices.storyName
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyName()");
+            res.status(status).send(message);
+        }
+    })
+
+    // ***** Author-Volume Relationships (Many:Many)
+
+    // GET /:authorId/volumes - Find Volume objects by Author ID
+    router.get("/:authorId/volumes", async (req, res) => {
+        try {
+            res.send(await AuthorServices.volumeAll
+            (req.params.id, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeAll()");
+            res.status(status).send(message);
+        }
+    })
+
+    // DELETE /:authorId/volumes/:volumeId - Remove Volume from this Author
+    router.delete("/:authorId/volumes/:volumeId", async (req, res) => {
+        try {
+            res.send(await AuthorServices.volumeRemove
+            (req.params.id, req.params.volumeId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // POST /:authorId/volumes/:seriesId - Add Volume to this Author
+    router.post("/:authorId/volumes/:volumeId", async (req, res) => {
+        try {
+            res.send(await AuthorServices.volumeAdd
+            (req.params.id, req.params.seriesId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:authorId/volumes/exact/:name - Find Volume by Author ID and exact name
+    router.get("/:authorId/volumes/exact/:name", async (req, res) => {
+        try {
+            res.send(await AuthorServices.volumeExact
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeExact()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:authorId/volumes/name/:name - Find Volume by Author ID and name segment
+    router.get("/:authorId/volumes/name/:name", async (req, res) => {
+        try {
+            res.send(await AuthorServices.volumeName
+            (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeName()");
             res.status(status).send(message);
         }
     })

@@ -92,7 +92,9 @@ module.exports = (app) => {
 
     // Model Specific Endpoints ----------------------------------------------
 
-    // GET /:id/authors - Get all Authors for this Series (optionally paginated)
+    // ***** Series-Author Relationships (Many:Many) *****
+
+    // GET /:id/authors - Get all Authors for this Series
     router.get("/:id/authors", async (req, res) => {
         try {
             res.send(await SeriesServices.authorAll
@@ -103,27 +105,13 @@ module.exports = (app) => {
         }
     })
 
-    // GET /:id/authors/exact/:firstName/:lastName
-    //   - Get Author for this Series by exact name
-    router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
+    // DELETE /:id/authors/:authorId - Remove Author from this Series
+    router.delete("/:id/authors/:authorId", async (req, res) => {
         try {
-            res.send(await SeriesServices.authorExact
-                (req.params.id, req.params.firstName,
-                 req.params.lastName, req.query));
+            res.send(await SeriesServices.authorRemove
+                (req.params.id, req.params.authorId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorExact()");
-            res.status(status).send(message);
-        }
-    })
-
-    // GET /:id/authors/name/:name
-    //   - Get Author for this Series by exact name
-    router.get("/:id/authors/exact/:name", async (req, res) => {
-        try {
-            res.send(await SeriesServices.authorName
-            (req.params.id, req.params.name, req.query));
-        } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorExact()");
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorAdd()");
             res.status(status).send(message);
         }
     })
@@ -132,9 +120,93 @@ module.exports = (app) => {
     router.post("/:id/authors/:authorId", async (req, res) => {
         try {
             res.send(await SeriesServices.authorAdd
-            (req.params.id, req.params.authorId));
+                (req.params.id, req.params.authorId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:id/authors/exact/:firstName/:lastName
+    //   - Get Author for this Series by exact name
+    router.get("/:id/authors/exact/:firstName/:lastName", async (req, res) => {
+        try {
+            res.send(await SeriesServices.authorExact
+            (req.params.id, req.params.firstName,
+                req.params.lastName, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorExact()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:id/authors/name/:name
+    //   - Get Authors for this Series by name segment match
+    router.get("/:id/authors/name/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.authorName
+                (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.authorExact()");
+            res.status(status).send(message);
+        }
+    })
+
+    // ***** Series-Story Relationships (Many:Many) *****
+
+    // GET /:id/stories - Get all Stories for this Series
+    router.get("/:id/stories", async (req, res) => {
+        try {
+            res.send(await SeriesServices.storyAll
+                (req.params.id, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.seriesAll()");
+            res.status(status).send(message);
+        }
+    })
+
+    // DELETE /:id/stories/:seriesId - Remove Story from this Series
+    router.delete("/:id/stories/:seriesId", async (req, res) => {
+        try {
+            res.send(await SeriesServices.seriesRemove
+                (req.params.id, req.params.seriesId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // POST /:id/stories/:seriesId - Add Story to this Series
+    router.post("/:id/stories/:seriesId", async (req, res) => {
+        try {
+            res.send(await SeriesServices.storyAdd
+                (req.params.id, req.params.seriesId));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.seriesAdd()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:id/stories/exact/:name
+    //   - Get Story for this Series by exact name
+    router.get("/:id/stories/exact/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.storyExact
+                (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.seriesExact()");
+            res.status(status).send(message);
+        }
+    })
+
+    // GET /:id/stories/name/:name
+    //   - Get Stories for this Series by name segment match
+    router.get("/:id/stories/name/:name", async (req, res) => {
+        try {
+            res.send(await SeriesServices.storyName
+                (req.params.id, req.params.name, req.query));
+        } catch (err) {
+            let [status, message] = FormatErrorResponse(err, "SeriesRouters.seriesExact()");
             res.status(status).send(message);
         }
     })
