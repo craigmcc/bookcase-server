@@ -9,6 +9,7 @@ const Library = db.Library;
 const Series = db.Series;
 const SeriesStory = db.SeriesStory;
 const Story = db.Story;
+
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
@@ -142,7 +143,8 @@ exports.update = async (seriesId, data) => {
             where: { id: seriesId }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`seriesId: Cannot update Series ${seriesId}`);
+            throw new BadRequest
+                (`seriesId: Cannot update Series ${seriesId}`);
         }
         await transaction.commit();
         transaction = null;
@@ -199,7 +201,8 @@ exports.authorAdd = async (seriesId, authorId) => {
     }
     if (series.libraryId !== author.libraryId) {
         throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
-            `Library ${series.libraryId} but Author ${authorId} belongs to ` +
+            `Library ${series.libraryId} ` +
+            `but Author ${authorId} belongs to ` +
             `Library ${author.libraryId}`);
     }
     let count = await AuthorSeries.count({
@@ -228,7 +231,8 @@ exports.authorAll = async (seriesId, queryParameters) => {
     return await series.getAuthors(options);
 }
 
-exports.authorExact = async (seriesId, firstName, lastName, queryParameters) => {
+exports.authorExact =
+        async (seriesId, firstName, lastName, queryParameters) => {
     let series = await Series.findByPk(seriesId);
     if (!series) {
         throw new NotFound(`seriesId: Missing Series ${seriesId}`);
@@ -243,7 +247,8 @@ exports.authorExact = async (seriesId, firstName, lastName, queryParameters) => 
     }, queryParameters);
     let results = await series.getAuthors(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Author '${firstName} ${lastName}'`);
+        throw new NotFound
+            (`name: Missing Author '${firstName} ${lastName}'`);
     }
     return results[0];
 }
@@ -277,7 +282,8 @@ exports.authorRemove = async (seriesId, authorId) => {
     }
     if (series.libraryId !== author.libraryId) {
         throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
-            `Library ${series.libraryId} but Author ${authorId} belongs to ` +
+            `Library ${series.libraryId} ` +
+            `but Author ${authorId} belongs to ` +
             `Library ${author.libraryId}`);
     }
     let count = await AuthorSeries.count({
@@ -307,13 +313,14 @@ exports.storyAdd = async (seriesId, storyId) => {
     }
     if (series.libraryId !== story.libraryId) {
         throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
-            `Library ${series.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${series.libraryId} ` +
+            `but Story ${storyId} belongs to ` +
             `Library ${story.libraryId}`);
     }
     let count = await SeriesStory.count({
         where: {
             storyId: storyId,
-            seriesId: id
+            seriesId: seriesId
         }
     });
     if (count > 0) {
@@ -381,7 +388,8 @@ exports.storyRemove = async (seriesId, storyId) => {
     }
     if (series.libraryId !== story.libraryId) {
         throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
-            `Library ${series.libraryId} but Story ${storyId} belongs to ` +
+            `Library ${series.libraryId} ` +
+            `but Story ${storyId} belongs to ` +
             `Library ${story.libraryId}`);
     }
     let count = await SeriesStory.count({
@@ -394,6 +402,6 @@ exports.storyRemove = async (seriesId, storyId) => {
         throw new BadRequest(`storyId: Story ${storyId} is not ` +
             `associated with Series ${seriesId}`);
     }
-    await series.removeStory(story); // returns instanceof AuthorSeries
+    await series.removeStory(story); // returns instanceof SeriesStory
     return story;
 }

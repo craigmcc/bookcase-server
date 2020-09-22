@@ -7,7 +7,6 @@ const Author = db.Author;
 const Library = db.Library;
 const Series = db.Series;
 const SeriesServices = require("../../src/services/SeriesServices");
-const Story = db.Story;
 
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
@@ -16,11 +15,10 @@ const {
     authorsData0, authorsData1, loadAuthors,
     librariesData0, librariesData1, loadLibraries,
     seriesData0, seriesData1, loadSeries,
-    storiesData0, storiesData1, loadStories,
 } = require("../util/SeedData");
 
 const {
-    authorKey, libraryKey, seriesKey, storyKey, volumeKey
+    authorKey
 } = require("../util/SortKeys");
 
 // External Modules ----------------------------------------------------------
@@ -28,9 +26,9 @@ const {
 const chai = require("chai");
 const expect = chai.expect;
 
-// SeriesServices Children Tests ---------------------------------------------
+// SeriesServices Author Children Tests --------------------------------------
 
-describe("SeriesServices Children Tests", () => {
+describe("SeriesServices Author Children Tests", () => {
 
     // Test Hooks ------------------------------------------------------------
 
@@ -289,7 +287,8 @@ describe("SeriesServices Children Tests", () => {
                     let result = await SeriesServices.authorExact
                         (seriesMatch.id, authorMatch.firstName, authorMatch.lastName);
                     expect(result.id).to.equal(authorMatch.id);
-                    expect(result.name).to.equal(authorMatch.name);
+                    expect(result.firstName).to.equal(authorMatch.firstName);
+                    expect(result.lastName).to.equal(authorMatch.lastName);
                 } catch (err) {
                     expect.fail(`Should not have thrown '${err.message}'`);
                 }
@@ -401,28 +400,6 @@ describe("SeriesServices Children Tests", () => {
 
         });
 
-    });
-
-    // ***** Series-Story Relationships (Many:Many) *****
-
-    describe("#storyAdd()", () => {
-        // TODO
-    });
-
-    describe("#storyAll()", () => {
-        // TODO
-    });
-
-    describe("#storyExact()", () => {
-        // TODO
-    });
-
-    describe("#storyName()", () => {
-        // TODO
-    });
-
-    describe("#storyRemove()", () => {
-        // TODO
     });
 
 });
