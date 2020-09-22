@@ -15,39 +15,30 @@ module.exports = (sequelize) => {
 
     AuthorVolume.init({
 
-/*
-        id: {
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-            type: DataTypes.BIGINT
-        },
-*/
-
         authorId: {
             allowNull: false,
             field: "authorid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-            validate: { } // TODO - field level validations
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         },
 
         volumeId: {
             allowNull: false,
             field: "volumeid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         }
 
     }, {
 
         createdAt: "published",
         modelName: "authorvolume",
-        tableName: "authorsvolumes",
+        tableName: "authors_volumes",
         timestamps: false,
         updatedAt: "updated",
-        validate: { }, // TODO - class level validations
+//        validate: { }, // TODO - class level validations
         version: false,
 
         sequelize
@@ -58,7 +49,7 @@ module.exports = (sequelize) => {
 
     AuthorVolume.associate = (models) => {
 
-        // Nothing further?
+        // Nothing further
 
     }
 

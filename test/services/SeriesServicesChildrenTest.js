@@ -8,7 +8,6 @@ const Library = db.Library;
 const Series = db.Series;
 const SeriesServices = require("../../src/services/SeriesServices");
 const Story = db.Story;
-const Volume = db.Volume;
 
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
@@ -18,7 +17,6 @@ const {
     librariesData0, librariesData1, loadLibraries,
     seriesData0, seriesData1, loadSeries,
     storiesData0, storiesData1, loadStories,
-    volumesData0, volumesData1, loadVolumes
 } = require("../util/SeedData");
 
 const {

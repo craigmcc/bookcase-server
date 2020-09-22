@@ -15,15 +15,6 @@ module.exports = (sequelize) => {
 
     SeriesStory.init({
 
-/*
-        id: {
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-            type: DataTypes.BIGINT
-        },
-*/
-
         ordinal: {
             allowNull: true,    // TODO: should be false?
             type: DataTypes.SMALLINT,
@@ -34,26 +25,26 @@ module.exports = (sequelize) => {
             allowNull: false,
             field: "seriesid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-            validate: { } // TODO - field level validations
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         },
 
         storyId: {
             allowNull: false,
             field: "storyid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         },
 
     }, {
 
         createdAt: "published",
         modelName: "seriesstory",
-        tableName: "seriesstories",
+        tableName: "series_stories",
         timestamps: false,
         updatedAt: "updated",
-        validate: { }, // TODO - class level validations
+//        validate: { }, // TODO - class level validations
         version: false,
 
         sequelize
@@ -64,7 +55,7 @@ module.exports = (sequelize) => {
 
     SeriesStory.associate = (models) => {
 
-        // Nothing further?
+        // Nothing further
 
     }
 

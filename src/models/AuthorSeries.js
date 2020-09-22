@@ -15,39 +15,30 @@ module.exports = (sequelize) => {
 
     AuthorSeries.init({
 
-/*
-        id: {
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-            type: DataTypes.BIGINT
-        },
-*/
-
         authorId: {
             allowNull: false,
             field: "authorid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-            validate: { } // TODO - field level validations
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         },
 
         seriesId: {
             allowNull: false,
             field: "seriesid",
             type: DataTypes.BIGINT,
-            unique: "uniqueJoin", // TODO - do we need database enforcement?
-
+            unique: "uniqueJoin",
+//            validate: { } // TODO - field level validations
         }
 
     }, {
 
         createdAt: "published",
         modelName: "authorseries",
-        tableName: "authorsseries",
+        tableName: "authors_series",
         timestamps: false,
         updatedAt: "updated",
-        validate: { }, // TODO - class level validations
+//        validate: { }, // TODO - class level validations
         version: false,
 
         sequelize
@@ -58,7 +49,7 @@ module.exports = (sequelize) => {
 
     AuthorSeries.associate = (models) => {
 
-        // Nothing further?
+        // Nothing further
 
     }
 
