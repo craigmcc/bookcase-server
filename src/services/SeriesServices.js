@@ -7,7 +7,8 @@ const Author = db.Author;
 const AuthorSeries = db.AuthorSeries;
 const Library = db.Library;
 const Series = db.Series;
-
+const SeriesStory = db.SeriesStory;
+const Story = db.Story;
 const BadRequest = require("../util/BadRequest");
 const NotFound = require("../util/NotFound");
 
@@ -60,11 +61,9 @@ let appendQueryParameters = (options, queryParameters) => {
     if ("" === queryParameters["withLibrary"]) {
         include.push(Library);
     }
-    /*
-        if ("" === queryParameters["withStories"]) {
-            include.push(Story);
-        }
-    */
+    if ("" === queryParameters["withStories"]) {
+        include.push(Story);
+    }
     if (include.length > 0) {
         options["include"] = include;
     }
@@ -83,11 +82,11 @@ exports.all = async (queryParameters) => {
     return await Series.findAll(options);
 }
 
-exports.find = async (id, queryParameters) => {
+exports.find = async (seriesId, queryParameters) => {
     let options = appendQueryParameters({}, queryParameters);
-    let result = await Series.findByPk(id, options);
+    let result = await Series.findByPk(seriesId, options);
     if (!result) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     } else {
         return result;
     }
@@ -115,24 +114,24 @@ exports.insert = async (data) => {
     }
 }
 
-exports.remove = async (id) => {
-    let result = await Series.findByPk(id);
+exports.remove = async (seriesId) => {
+    let result = await Series.findByPk(seriesId);
     if (!result) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let num = await Series.destroy({
-        where: { id: id }
+        where: { id: seriesId }
     });
     if (num !== 1) {
-        throw new NotFound(`id: Cannot remove Series ${id}`);
+        throw new NotFound(`seriesId: Cannot remove Series ${seriesId}`);
     }
     return result;
 }
 
-exports.update = async (id, data) => {
-    let original = await Series.findByPk(id);
+exports.update = async (seriesId, data) => {
+    let original = await Series.findByPk(seriesId);
     if (!original) {
-        throw new NotFound(`id: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let transaction;
     try {
@@ -140,14 +139,14 @@ exports.update = async (id, data) => {
         let result = await Series.update(data, {
             fields: fieldsWithId,
             transaction: transaction,
-            where: { id: id }
+            where: { id: seriesId }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`id: Cannot update Series ${id}`);
+            throw new BadRequest(`seriesId: Cannot update Series ${seriesId}`);
         }
         await transaction.commit();
         transaction = null;
-        return await Series.findByPk(id);
+        return await Series.findByPk(seriesId);
     } catch (err) {
         if (transaction) {
             await transaction.rollback();
@@ -166,7 +165,9 @@ exports.update = async (id, data) => {
 
 exports.exact = async (name, queryParameters) => {
     let options = appendQueryParameters({
-        where: { name: name }
+        where: {
+            name: name
+        }
     }, queryParameters);
     let results = await Series.findAll(options);
     if (results.length !== 1) {
@@ -187,29 +188,29 @@ exports.name = async (name, queryParameters) => {
 
 // ***** Series-Author Relationships (Many:Many) *****
 
-exports.authorAdd = async (id, authorId) => {
-    let series = await Series.findByPk(id);
+exports.authorAdd = async (seriesId, authorId) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let author = await Author.findByPk(authorId);
     if (!author) {
         throw new NotFound(`authorId: Missing Author ${authorId}`);
     }
     if (series.libraryId !== author.libraryId) {
-        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+        throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
             `Library ${series.libraryId} but Author ${authorId} belongs to ` +
             `Library ${author.libraryId}`);
     }
     let count = await AuthorSeries.count({
         where: {
             authorId: authorId,
-            seriesId: id
+            seriesId: seriesId,
         }
     });
     if (count > 0) {
         throw new BadRequest(`authorId: Author ${authorId} is already ` +
-            `associated with Series ${id}`);
+            `associated with Series ${seriesId}`);
     }
     await series.addAuthor(author); // returns instanceof AuthorSeries
     return author;
@@ -227,10 +228,10 @@ exports.authorAll = async (seriesId, queryParameters) => {
     return await series.getAuthors(options);
 }
 
-exports.authorExact = async (id, firstName, lastName, queryParameters) => {
+exports.authorExact = async (seriesId, firstName, lastName, queryParameters) => {
     let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -247,10 +248,10 @@ exports.authorExact = async (id, firstName, lastName, queryParameters) => {
     return results[0];
 }
 
-exports.authorName = async (id, name, queryParameters) => {
-    let series = await Series.findByPk(id);
+exports.authorName = async (seriesId, name, queryParameters) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
@@ -265,29 +266,29 @@ exports.authorName = async (id, name, queryParameters) => {
     return await series.getAuthors(options);
 }
 
-exports.authorRemove = async (id, authorId) => {
-    let series = await Series.findByPk(id);
+exports.authorRemove = async (seriesId, authorId) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let author = await Author.findByPk(authorId);
     if (!author) {
         throw new NotFound(`authorId: Missing Author ${authorId}`);
     }
     if (series.libraryId !== author.libraryId) {
-        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+        throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
             `Library ${series.libraryId} but Author ${authorId} belongs to ` +
             `Library ${author.libraryId}`);
     }
     let count = await AuthorSeries.count({
         where: {
             authorId: authorId,
-            seriesId: id
+            seriesId: seriesId,
         }
     });
     if (count === 0) {
         throw new BadRequest(`authorId: Author ${authorId} is not ` +
-            `associated with Series ${id}`);
+            `associated with Series ${seriesId}`);
     }
     await series.removeAuthor(author); // returns instanceof AuthorSeries
     return author;
@@ -295,21 +296,21 @@ exports.authorRemove = async (id, authorId) => {
 
 // ***** Series-Story Relationships (Many:Many) *****
 
-exports.storyAdd = async (id, storyId) => {
-    let series = await Series.findByPk(id);
+exports.storyAdd = async (seriesId, storyId) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let story = await Story.findByPk(storyId);
     if (!story) {
         throw new NotFound(`storyId: Missing Story ${storyId}`);
     }
     if (series.libraryId !== story.libraryId) {
-        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+        throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
             `Library ${series.libraryId} but Story ${storyId} belongs to ` +
             `Library ${story.libraryId}`);
     }
-    let count = await StorySeries.count({
+    let count = await SeriesStory.count({
         where: {
             storyId: storyId,
             seriesId: id
@@ -317,9 +318,9 @@ exports.storyAdd = async (id, storyId) => {
     });
     if (count > 0) {
         throw new BadRequest(`storyId: Story ${storyId} is already ` +
-            `associated with Series ${id}`);
+            `associated with Series ${seriesId}`);
     }
-    await series.addStory(story); // returns instanceof StorySeries
+    await series.addStory(story); // returns instanceof SeriesStory
     return story;
 }
 
@@ -330,72 +331,68 @@ exports.storyAll = async (seriesId, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        order: [ ["name", "ASC"] ],
     }, queryParameters);
-    return await series.getStorys(options);
+    return await series.getStories(options);
 }
 
-exports.storyExact = async (id, firstName, lastName, queryParameters) => {
+exports.storyExact = async (seriesId, name, queryParameters) => {
     let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let options = appendQueryParameters({
-        joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        joinTableAttributes: [ "ordinal" ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
         where: {
-            firstName: firstName,
-            lastName: lastName,
+            name: name
         }
     }, queryParameters);
-    let results = await series.getStorys(options);
+    let results = await series.getStories(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Story '${firstName} ${lastName}'`);
+        throw new NotFound(`name: Missing Story '${name}'`);
     }
     return results[0];
 }
 
-exports.storyName = async (id, name, queryParameters) => {
-    let series = await Series.findByPk(id);
+exports.storyName = async (seriesId, name, queryParameters) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let options = appendQueryParameters({
-        joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        joinTableAttributes: [ "ordinal" ], // attribute names from join table
+        order: [ ["name", "ASC"] ],
         where: {
-            [Op.or]: {
-                firstName: {[Op.iLike]: `%${name}%`},
-                lastName: {[Op.iLike]: `%${name}%`}
-            }
+            name: { [Op.ilike]: `%${name}%` }
         }
     }, queryParameters);
-    return await series.getStorys(options);
+    return await series.getStories(options);
 }
 
-exports.storyRemove = async (id, storyId) => {
-    let series = await Series.findByPk(id);
+exports.storyRemove = async (seriesId, storyId) => {
+    let series = await Series.findByPk(seriesId);
     if (!series) {
-        throw new NotFound(`seriesId: Missing Series ${id}`);
+        throw new NotFound(`seriesId: Missing Series ${seriesId}`);
     }
     let story = await Story.findByPk(storyId);
     if (!story) {
         throw new NotFound(`storyId: Missing Story ${storyId}`);
     }
     if (series.libraryId !== story.libraryId) {
-        throw new BadRequest(`libraryId: Series ${id} belongs to ` +
+        throw new BadRequest(`libraryId: Series ${seriesId} belongs to ` +
             `Library ${series.libraryId} but Story ${storyId} belongs to ` +
             `Library ${story.libraryId}`);
     }
-    let count = await StorySeries.count({
+    let count = await SeriesStory.count({
         where: {
+            seriesId: seriesId,
             storyId: storyId,
-            seriesId: id
         }
     });
     if (count === 0) {
         throw new BadRequest(`storyId: Story ${storyId} is not ` +
-            `associated with Series ${id}`);
+            `associated with Series ${seriesId}`);
     }
     await series.removeStory(story); // returns instanceof AuthorSeries
     return story;

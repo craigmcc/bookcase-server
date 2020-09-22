@@ -6,9 +6,14 @@ const db = require("../../src/models");
 const Author = db.Author;
 const Library = db.Library;
 const Series = db.Series;
+const SeriesStory = db.SeriesStory;
 const SeriesServices = require("../../src/services/SeriesServices");
+const Story = db.Story;
+
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
+
+
 
 // External Modules ----------------------------------------------------------
 
@@ -256,160 +261,6 @@ describe("SeriesServices Tests", () => {
 
     });
 
-    describe("#authorAdd()", () => {
-
-        context("all objects", () => {
-
-            it("should fail with duplicate authorId", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch0 = authors[0].dataValues;
-                let authorMatch1 = authors[0].dataValues; // Duplicate
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-
-                try {
-                    let result0 = await SeriesServices.authorAdd
-                        (seriesMatch.id, authorMatch0.id);
-                    let result1 = await SeriesServices.authorAdd
-                        (seriesMatch.id, authorMatch1.id);
-                    expect.fail("Should have thrown BadRequest");
-                } catch (err) {
-                    if (err instanceof BadRequest) {
-                        expect(err.message)
-                            .includes(`authorId: Author ${authorMatch0.id} is already ` +
-                                `associated with Series ${seriesMatch.id}`);
-                    } else {
-                        expect.fail(`Should not have thrown '${err.message}'`);
-                    }
-                }
-
-            });
-
-            it("should fail with invalid authorId", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-//                let authorMatch = authors[1].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let invalidAuthorId = 9999;
-
-                try {
-                    await SeriesServices.authorAdd
-                        (seriesMatch.id, invalidAuthorId);
-                    expect.fail("Should have thrown NotFound");
-                } catch (err) {
-                    if (err instanceof NotFound) {
-                        expect(err.message)
-                            .includes(`authorId: Missing Author ${invalidAuthorId}`);
-                    } else {
-                        expect.fail(`Should not have thrown '${err.message}'`);
-                    }
-                }
-
-            });
-
-            it("should fail with invalid seriesId", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[1].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-//                let seriesMatch = series[2].dataValues;
-                let invalidSeriesId = 9999;
-
-                try {
-                    await SeriesServices.authorAdd
-                        (invalidSeriesId, authorMatch.id);
-                    expect.fail("Should have thrown NotFound");
-                } catch (err) {
-                    if (err instanceof NotFound) {
-                        expect(err.message)
-                            .includes(`seriesId: Missing Series ${invalidSeriesId}`);
-                    } else {
-                        expect.fail(`Should not have thrown '${err.message}'`);
-                    }
-                }
-
-            });
-
-            it("should fail with mismatched libraryId", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch0 = libraries[0].dataValues;
-                let libraryMatch1 = libraries[1].dataValues;
-                let authors0 = await loadAuthors(libraryMatch0, authorsData0);
-//                let authorMatch0 = authors0[1].dataValues;
-                let authors1 = await loadAuthors(libraryMatch1, authorsData1);
-                let authorMatch1 = authors1[2].dataValues;
-                let series0 = await loadSeries(libraryMatch0, seriesData0);
-                let seriesMatch0 = series0[0].dataValues;
-
-                try {
-                    await SeriesServices.authorAdd
-                        (seriesMatch0.id, authorMatch1.id);
-                    expect.fail("Should have thrown BadRequest");
-                } catch (err) {
-                    if (err instanceof BadRequest) {
-                        expect(err.message)
-                            .includes(`libraryId: Series ${seriesMatch0.id} belongs to ` +
-                                `Library ${seriesMatch0.libraryId} but Author ${authorMatch1.id} belongs to ` +
-                                `Library ${authorMatch1.libraryId}`);
-                    } else {
-                        expect.fail(`Should not have thrown '${err.message}'`);
-                    }
-                }
-
-            });
-
-            it("should succeed with one author", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[1].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-
-                try {
-                    let result = await SeriesServices.authorAdd
-                        (seriesMatch.id, authorMatch.id);
-                } catch (err) {
-                    expect.fail(`Should not have thrown '${err.message}'`);
-                }
-
-            });
-
-            it("should succeed with two authors", async () => {
-
-                let libraries = await loadLibraries();
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch0 = authors[0].dataValues;
-                let authorMatch1 = authors[1].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-
-                try {
-                    await SeriesServices.authorAdd
-                        (seriesMatch.id, authorMatch0.id);
-                    await SeriesServices.authorAdd
-                        (seriesMatch.id, authorMatch1.id);
-                } catch (err) {
-                    expect.fail(`Should not have thrown '${err.message}'`);
-                }
-
-            });
-
-        });
-
-    })
-
     describe("#find()", () => {
 
         context("all objects", () => {
@@ -426,10 +277,10 @@ describe("SeriesServices Tests", () => {
                     expect.fail("Should have thrown NotFound initially");
                 } catch (err) {
                     if (!(err instanceof NotFound)) {
-                        expect.fail(`Should have thrown NotFound for '${err.message}'`);
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Series ${invalidId}`);
+                        .includes(`seriesId: Missing Series ${invalidId}`);
                 }
 
             });
@@ -618,7 +469,7 @@ describe("SeriesServices Tests", () => {
                         expect.fail(`Should have thrown NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Series ${invalidId}`);
+                        .includes(`seriesId: Missing Series ${invalidId}`);
                 }
 
             });
@@ -696,7 +547,7 @@ describe("SeriesServices Tests", () => {
                         expect.fail(`Should have thrown NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Series ${invalidId}`);
+                        .includes(`seriesId: Missing Series ${invalidId}`);
                 }
 
             });

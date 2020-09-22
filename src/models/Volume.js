@@ -129,10 +129,12 @@ module.exports = (sequelize) => {
     });
 
     let validMediaValues = [
-        "Book",
-        "Kindle",
-        "Kobo",
-        "PDF"
+        "Book",      // Physical book
+        "Kindle",    // Downloaded to Kindle app
+        "Kobo",      // Downloaded to Kobo app
+        "PDF",       // Downloaded as a PDF
+        "Unknown",   // Unknown media type
+        "Watch",     // Not yet purchased or downloaded
     ];
 
     // Volume Associations ---------------------------------------------------

@@ -6,6 +6,7 @@
 
 const db = require("../../src/models");
 const Author = db.Author;
+const AuthorServices = require("../../src/services/AuthorServices");
 const Library = db.Library;
 const Series = db.Series;
 const Story = db.Story;

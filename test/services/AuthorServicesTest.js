@@ -11,7 +11,9 @@ const NotFound = require("../../src/util/NotFound");
 
 const {
     authorsData0, authorsData1, loadAuthors,
-    librariesData0, librariesData1, loadLibraries
+    librariesData0, librariesData1, loadLibraries,
+    storiesData0, storiesData1, loadStories,
+    volumesData0, volumesData1, loadVolumes,
 } = require("../util/SeedData");
 
 const {
@@ -158,7 +160,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Author ${invalidId}`);
+                        .includes(`authorId: Missing Author ${invalidId}`);
                 }
 
             });
@@ -341,7 +343,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Author ${invalidId}`);
+                        .includes(`authorId: Missing Author ${invalidId}`);
                 }
 
             });
@@ -418,7 +420,7 @@ describe("AuthorServices Tests", () => {
                         expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`id: Missing Author ${invalidId}`);
+                        .includes(`authorId: Missing Author ${invalidId}`);
                 }
 
             });
