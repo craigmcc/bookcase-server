@@ -163,8 +163,6 @@ exports.update = async (seriesId, data) => {
 
 // Model Specific Methods ----------------------------------------------------
 
-// ***** Series Name Lookups *****
-
 exports.exact = async (name, queryParameters) => {
     let options = appendQueryParameters({
         where: {
@@ -187,6 +185,8 @@ exports.name = async (name, queryParameters) => {
     }, queryParameters);
     return await Series.findAll(options);
 }
+
+// Relationship Specific Methods ---------------------------------------------
 
 // ***** Series-Author Relationships (Many:Many) *****
 
