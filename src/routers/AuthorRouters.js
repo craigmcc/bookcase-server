@@ -39,7 +39,7 @@ module.exports = (app) => {
     // DELETE /:authorId - Remove Author by ID
     router.delete("/:authorId", async (req, res) => {
         try {
-            res.send(await AuthorServices.remove(req.params.id));
+            res.send(await AuthorServices.remove(req.params.authorId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.remove()");
             res.status(status).send(message);
@@ -49,7 +49,7 @@ module.exports = (app) => {
     // GET /:authorId - Find Author by ID
     router.get("/:authorId", async (req, res) => {
         try {
-            res.send(await AuthorServices.find(req.params.id, req.query));
+            res.send(await AuthorServices.find(req.params.authorId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.find()");
             res.status(status).send(message);
@@ -59,7 +59,7 @@ module.exports = (app) => {
     // PUT /:authorId - Update Author by ID
     router.put("/:authorId", async (req, res) => {
         try {
-            res.send(await AuthorServices.update(req.params.id, req.body));
+            res.send(await AuthorServices.update(req.params.authorId, req.body));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.update()");
             res.status(status).send(message);
@@ -74,7 +74,7 @@ module.exports = (app) => {
     router.get("/:authorId/series", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesAll
-                (req.params.id, req.query));
+                (req.params.authorId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAll()");
             res.status(status).send(message);
@@ -85,7 +85,7 @@ module.exports = (app) => {
     router.get("/:authorId/series/exact/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesExact
-                (req.params.id, req.params.name, req.query));
+                (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesExact()");
             res.status(status).send(message);
@@ -96,7 +96,7 @@ module.exports = (app) => {
     router.get("/:authorId/series/name/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.seriesName
-                (req.params.id, req.params.name, req.query));
+                (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesName()");
             res.status(status).send(message);
@@ -109,7 +109,7 @@ module.exports = (app) => {
     router.get("/:authorId/stories", async (req, res) => {
         try {
             res.send(await AuthorServices.storyAll
-            (req.params.id, req.query));
+            (req.params.authorId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyAll()");
             res.status(status).send(message);
@@ -120,7 +120,7 @@ module.exports = (app) => {
     router.delete("/:authorId/stories/:storyId", async (req, res) => {
         try {
             res.send(await AuthorServices.storyRemove
-            (req.params.id, req.params.storyId));
+            (req.params.authorId, req.params.storyId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
@@ -131,7 +131,7 @@ module.exports = (app) => {
     router.post("/:authorId/stories/:storyId", async (req, res) => {
         try {
             res.send(await AuthorServices.storyAdd
-            (req.params.id, req.params.seriesId));
+            (req.params.authorId, req.params.seriesId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
@@ -142,7 +142,7 @@ module.exports = (app) => {
     router.get("/:authorId/stories/exact/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.storyExact
-            (req.params.id, req.params.name, req.query));
+            (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyExact()");
             res.status(status).send(message);
@@ -153,7 +153,7 @@ module.exports = (app) => {
     router.get("/:authorId/stories/name/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.storyName
-            (req.params.id, req.params.name, req.query));
+            (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyName()");
             res.status(status).send(message);
@@ -166,7 +166,7 @@ module.exports = (app) => {
     router.get("/:authorId/volumes", async (req, res) => {
         try {
             res.send(await AuthorServices.volumeAll
-            (req.params.id, req.query));
+            (req.params.authorId, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeAll()");
             res.status(status).send(message);
@@ -177,7 +177,7 @@ module.exports = (app) => {
     router.delete("/:authorId/volumes/:volumeId", async (req, res) => {
         try {
             res.send(await AuthorServices.volumeRemove
-            (req.params.id, req.params.volumeId));
+            (req.params.authorId, req.params.volumeId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
@@ -188,7 +188,7 @@ module.exports = (app) => {
     router.post("/:authorId/volumes/:volumeId", async (req, res) => {
         try {
             res.send(await AuthorServices.volumeAdd
-            (req.params.id, req.params.seriesId));
+            (req.params.authorId, req.params.seriesId));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
@@ -199,7 +199,7 @@ module.exports = (app) => {
     router.get("/:authorId/volumes/exact/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.volumeExact
-            (req.params.id, req.params.name, req.query));
+            (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeExact()");
             res.status(status).send(message);
@@ -210,7 +210,7 @@ module.exports = (app) => {
     router.get("/:authorId/volumes/name/:name", async (req, res) => {
         try {
             res.send(await AuthorServices.volumeName
-            (req.params.id, req.params.name, req.query));
+            (req.params.authorId, req.params.name, req.query));
         } catch (err) {
             let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeName()");
             res.status(status).send(message);

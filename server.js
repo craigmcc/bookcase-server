@@ -34,6 +34,7 @@ app.get("/", (req, res) => {
 
 // TODO - Configure Routers
 require("./src/routers/AuthorRouters")(app);
+require("./src/routers/DevModeRouters")(app);
 require("./src/routers/LibraryRouters")(app);
 require("./src/routers/SeriesRouters")(app);
 

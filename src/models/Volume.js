@@ -91,6 +91,11 @@ module.exports = (sequelize) => {
         notes: {
             allowNull: true,
             type: DataTypes.STRING,
+        },
+
+        read: {
+            allowNull: true,
+            type: DataTypes.BOOLEAN
         }
 
     }, {
@@ -130,9 +135,11 @@ module.exports = (sequelize) => {
 
     let validMediaValues = [
         "Book",      // Physical book
-        "Kindle",    // Downloaded to Kindle app
+        "Kindle",    // Downloaded to Kindle app as purchased
         "Kobo",      // Downloaded to Kobo app
         "PDF",       // Downloaded as a PDF
+        "Returned",  // Returned to Kindle Unlimited but available to reload
+        "Unlimited", // Downloaded to Kindle app as Unlimited
         "Unknown",   // Unknown media type
         "Watch",     // Not yet purchased or downloaded
     ];
