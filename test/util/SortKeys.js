@@ -3,7 +3,7 @@
 // EXPORTS FUNCTIONS TO CALCULATE SORT KEYS FOR MODEL OBJECTS
 
 module.exports.authorKey = (author) => {
-    return "|" + author.libraryId + "|" + author.lastName + "|" + author.firstName;
+    return "|" + author.lastName + "|" + author.firstName + "|" + author.libraryId;
 }
 
 module.exports.libraryKey = (library) => {

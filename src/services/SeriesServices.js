@@ -338,7 +338,7 @@ exports.storyAll = async (seriesId, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
     }, queryParameters);
     return await series.getStories(options);
 }
@@ -350,7 +350,6 @@ exports.storyExact = async (seriesId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ "ordinal" ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
         where: {
             name: name
         }
@@ -369,7 +368,7 @@ exports.storyName = async (seriesId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ "ordinal" ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
         where: {
             name: { [Op.ilike]: `%${name}%` }
         }

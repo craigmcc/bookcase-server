@@ -333,7 +333,7 @@ exports.seriesAll = async (storyId, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
     }, queryParameters);
     return await story.getSeries(options);
 }
@@ -345,7 +345,7 @@ exports.seriesExact = async (storyId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
         where: {
             name: name,
         }
@@ -364,7 +364,7 @@ exports.seriesName = async (storyId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["lastName", "ASC"], ["firstName", "ASC"] ],
+        order: order,
         where: {
             name: { [Op.ilike]: `%${name}%` }
         }
@@ -438,7 +438,7 @@ exports.volumeAll = async (storyId, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
     }, queryParameters);
     return await story.getVolumes(options);
 }
@@ -466,7 +466,7 @@ exports.volumeName = async (storyId, name, queryParameters) => {
         throw new NotFound(`storyId: Missing Story ${storyId}`);
     }
     let options = appendQueryParameters({
-        order: [ ["name", "ASC" ]],
+        order: order,
         where: {
             name: { [Op.iLike]: `%${name}%`},
         }

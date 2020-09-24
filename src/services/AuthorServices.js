@@ -22,9 +22,9 @@ const fields = [
 ];
 const fieldsWithId = [...fields, "id"];
 const order = [
-    ["libraryId", "ASC"],
     ["lastName", "ASC"],
-    ["firstName", "ASC"]
+    ["firstName", "ASC"],
+    ["libraryId", "ASC"],
 ];
 
 // External Modules ----------------------------------------------------------

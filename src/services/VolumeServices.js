@@ -19,7 +19,8 @@ const fields = [
     "location",
     "media",
     "name",
-    "notes"
+    "notes",
+    "read",
 ];
 const fieldsWithId = [...fields, "id"];
 const order = [
@@ -268,6 +269,35 @@ exports.authorName = async (volumeId, name, queryParameters) => {
     return await volume.getAuthors(options);
 }
 
+exports.authorRemove = async (volumeId, authorId) => {
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`seriesId: Missing Volume ${volumeId}`);
+    }
+    let author = await Author.findByPk(authorId);
+    if (!author) {
+        throw new NotFound(`authorId: Missing Author ${authorId}`);
+    }
+    if (volume.libraryId !== author.libraryId) {
+        throw new BadRequest(`libraryId: Volume ${volumeId} belongs to ` +
+            `Library ${volume.libraryId} ` +
+            `but Author ${authorId} belongs to ` +
+            `Library ${author.libraryId}`);
+    }
+    let count = await AuthorVolume.count({
+        where: {
+            authorId: authorId,
+            volumeId: volumeId,
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`authorId: Author ${authorId} is not ` +
+            `associated with Volume ${volumeId}`);
+    }
+    await volume.removeAuthor(author); // returns instanceof AuthorVolume
+    return author;
+}
+
 // ***** Volume-Story Relationships (Many:Many) *****
 
 exports.storyAdd = async (volumeId, storyId) => {
@@ -305,7 +335,7 @@ exports.storyAll = async (volumeId, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
     }, queryParameters);
     return await volume.getStories(options);
 }
@@ -317,7 +347,7 @@ exports.storyExact = async (volumeId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
         where: {
             name: name
         }
@@ -336,10 +366,39 @@ exports.storyName = async (volumeId, name, queryParameters) => {
     }
     let options = appendQueryParameters({
         joinTableAttributes: [ ], // attribute names from join table
-        order: [ ["name", "ASC"] ],
+        order: order,
         where: {
             name: { [Op.iLike]: `%${name}%` }
         }
     }, queryParameters);
     return await volume.getStories(options);
+}
+
+exports.storyRemove = async (volumeId, storyId) => {
+    let volume = await Volume.findByPk(volumeId);
+    if (!volume) {
+        throw new NotFound(`seriesId: Missing Volume ${volumeId}`);
+    }
+    let story = await Story.findByPk(storyId);
+    if (!story) {
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
+    }
+    if (volume.libraryId !== story.libraryId) {
+        throw new BadRequest(`libraryId: Volume ${volumeId} belongs to ` +
+            `Library ${volume.libraryId} ` +
+            `but Story ${storyId} belongs to ` +
+            `Library ${story.libraryId}`);
+    }
+    let count = await StoryVolume.count({
+        where: {
+            storyId: storyId,
+            volumeId: volumeId,
+        }
+    });
+    if (count === 0) {
+        throw new BadRequest(`storyId: Story ${storyId} is not ` +
+            `associated with Volume ${volumeId}`);
+    }
+    await volume.removeStory(story); // returns instanceof StoryVolume
+    return story;
 }

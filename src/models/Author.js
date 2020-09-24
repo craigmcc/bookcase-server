@@ -30,18 +30,7 @@ module.exports = (sequelize) => {
             type: DataTypes.BIGINT
         },
 
-        firstName: {
-            allowNull: false,
-            field: "firstname",
-            type: DataTypes.STRING,
-            unique: "uniqueNameWithinLibrary",
-            validate: {
-                notNull: {
-                    msg: "firstName: Is required"
-                }
-            }
-        },
-
+        // Ahead of firstName to influence the uniqueness constraint key order
         lastName: {
             allowNull: false,
             field: "lastname",
@@ -50,6 +39,18 @@ module.exports = (sequelize) => {
             validate: {
                 notNull: {
                     msg: "lastName: Is required"
+                }
+            }
+        },
+
+        firstName: {
+            allowNull: false,
+            field: "firstname",
+            type: DataTypes.STRING,
+            unique: "uniqueNameWithinLibrary",
+            validate: {
+                notNull: {
+                    msg: "firstName: Is required"
                 }
             }
         },
