@@ -318,7 +318,7 @@ exports.storyAdd = async (authorId, storyId) => {
     }
     let count = await AuthorStory.count({
         where: {
-            authorId: id,
+            authorId: authorId,
             storyId: storyId,
         }
     });

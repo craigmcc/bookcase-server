@@ -25,12 +25,14 @@ module.exports = (app) => {
         let results = {
             countAuthors: 0,
             countAuthorsSeries: 0,
+            countAuthorsStories: 0,
             countAuthorsVolumes: 0,
             countRows: 0,
             countSeries: 0,
-            countSeriesAuthors: 0,
-            countSeriesVolumes: 0,
+            countSeriesStories: 0,
+            countStories: 0,
             countVolumes: 0,
+            countVolumesStories: 0,
         };
 
         try {
