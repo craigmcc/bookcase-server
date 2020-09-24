@@ -2,6 +2,8 @@
 
 // Internal Modules ----------------------------------------------------------
 
+let Author;       // Filled in by associate()
+let AuthorVolume; // Filled in by associate()
 let Library;      // Filled in by associate()
 let Story;        // Filled in by associate()
 let VolumeStory;  // Filled in by associate()
@@ -148,9 +150,13 @@ module.exports = (sequelize) => {
 
     Volume.associate = (models) => {
 
+        Author = models.Author;
+        AuthorVolume = models.AuthorVolume;
         Library = models.Library;
         Story = models.Story;
         VolumeStory = models.VolumeStory;
+
+        Volume.belongsToMany(Author, { through: AuthorVolume });
 
         Volume.belongsTo(Library, {
             onDelete: "CASCADE",

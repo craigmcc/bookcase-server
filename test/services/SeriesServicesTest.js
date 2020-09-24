@@ -28,30 +28,10 @@ describe("SeriesServices Tests", () => {
 
     // Test Hooks ------------------------------------------------------------
 
-    before("#init", async () => {
-        await Author.sync({
-            force: true
-        });
-        await Library.sync({
-            force: true
-        });
-        await Series.sync({
-            force: true
-        });
-    });
-
-    beforeEach("#erase", async () => {
-        await Author.destroy({
-            cascade: true,
-            truncate: true
-        });
-        await Series.destroy({
-            cascade: true,
-            truncate: true
-        });
-        await Library.destroy({
-            cascade: true,
-            truncate: true
+    beforeEach("#beforeEach()", async () => {
+        await db.sequelize.sync({
+            force: true,
+            truncate: true,
         })
     });
 

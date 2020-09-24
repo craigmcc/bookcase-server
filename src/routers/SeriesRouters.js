@@ -2,11 +2,8 @@
 
 // Internal Modules ----------------------------------------------------------
 
-const db = require("../models");
-const FormatErrorResponse = require("../util/FormatErrorResponse");
 const SeriesServices = require("../services/SeriesServices");
-
-const NotFound = require("../util/NotFound");
+const FormatErrorResponse = require("../util/FormatErrorResponse");
 
 // External Modules ----------------------------------------------------------
 
@@ -153,8 +150,8 @@ module.exports = (app) => {
         async (req, res) => {
         try {
             res.send(await SeriesServices.authorExact
-            (req.params.seriesId, req.params.firstName,
-                req.params.lastName, req.query));
+                (req.params.seriesId, req.params.firstName,
+                 req.params.lastName, req.query));
         } catch (err) {
             let [status, message] =
                 FormatErrorResponse(err, "SeriesRouters.authorExact()");

@@ -37,6 +37,8 @@ require("./src/routers/AuthorRouters")(app);
 require("./src/routers/DevModeRouters")(app);
 require("./src/routers/LibraryRouters")(app);
 require("./src/routers/SeriesRouters")(app);
+require("./src/routers/StoryRouters")(app);
+require("./src/routers/VolumeRouters")(app);
 
 // Start Server --------------------------------------------------------------
 

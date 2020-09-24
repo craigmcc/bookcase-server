@@ -16,6 +16,9 @@ module.exports = (app) => {
 
     // Public Routes ---------------------------------------------------------
 
+    // NOTE:  Trying to embed csvtojson stuff in service module causes grief
+    //        when the results are returned immediately rather than after
+    //        all the processing is complete.  Therefore, do that part here.
     router.post("/import", async (req, res) => {
 
         let [ library, createdLibrary ] = await acquireLibrary();

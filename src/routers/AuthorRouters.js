@@ -2,7 +2,6 @@
 
 // Internal Modules ----------------------------------------------------------
 
-const db = require("../models");
 const AuthorServices = require("../services/AuthorServices");
 const FormatErrorResponse = require("../util/FormatErrorResponse");
 
@@ -21,7 +20,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.all(req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.all()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.all()");
             res.status(status).send(message);
         }
     })
@@ -31,7 +31,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.insert(req.body));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.insert()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.insert()");
             res.status(status).send(message);
         }
     })
@@ -41,7 +42,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.remove(req.params.authorId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.remove()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.remove()");
             res.status(status).send(message);
         }
     })
@@ -51,7 +53,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.find(req.params.authorId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.find()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.find()");
             res.status(status).send(message);
         }
     })
@@ -61,7 +64,8 @@ module.exports = (app) => {
         try {
             res.send(await AuthorServices.update(req.params.authorId, req.body));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.update()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.update()");
             res.status(status).send(message);
         }
     })
@@ -76,7 +80,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesAll
                 (req.params.authorId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesAll()");
             res.status(status).send(message);
         }
     })
@@ -87,7 +92,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesExact
                 (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesExact()");
             res.status(status).send(message);
         }
     })
@@ -98,7 +104,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.seriesName
                 (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesName()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesName()");
             res.status(status).send(message);
         }
     })
@@ -111,7 +118,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.storyAll
             (req.params.authorId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.storyAll()");
             res.status(status).send(message);
         }
     })
@@ -122,7 +130,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.storyRemove
             (req.params.authorId, req.params.storyId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
         }
     })
@@ -133,7 +142,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.storyAdd
             (req.params.authorId, req.params.seriesId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
         }
     })
@@ -144,7 +154,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.storyExact
             (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.storyExact()");
             res.status(status).send(message);
         }
     })
@@ -155,7 +166,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.storyName
             (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.storyName()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.storyName()");
             res.status(status).send(message);
         }
     })
@@ -168,7 +180,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.volumeAll
             (req.params.authorId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.volumeAll()");
             res.status(status).send(message);
         }
     })
@@ -179,7 +192,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.volumeRemove
             (req.params.authorId, req.params.volumeId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
         }
     })
@@ -190,7 +204,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.volumeAdd
             (req.params.authorId, req.params.seriesId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.seriesAdd()");
             res.status(status).send(message);
         }
     })
@@ -201,7 +216,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.volumeExact
             (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.volumeExact()");
             res.status(status).send(message);
         }
     })
@@ -212,7 +228,8 @@ module.exports = (app) => {
             res.send(await AuthorServices.volumeName
             (req.params.authorId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "AuthorRouters.volumeName()");
+            let [status, message] =
+                FormatErrorResponse(err, "AuthorRouters.volumeName()");
             res.status(status).send(message);
         }
     })

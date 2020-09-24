@@ -2,9 +2,8 @@
 
 // Internal Modules ----------------------------------------------------------
 
-const db = require("../models");
-const FormatErrorResponse = require("../util/FormatErrorResponse");
 const LibraryServices = require("../services/LibraryServices");
+const FormatErrorResponse = require("../util/FormatErrorResponse");
 
 // External Modules ----------------------------------------------------------
 
@@ -21,7 +20,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.exact(req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.exact()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.exact()");
             res.status(status).send(message);
         }
     })
@@ -31,7 +31,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.name(req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.name()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.name()");
             res.status(status).send(message);
         }
     })
@@ -43,7 +44,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.all(req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.all()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.all()");
             res.status(status).send(message);
         }
     })
@@ -53,7 +55,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.insert(req.body));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.insert()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.insert()");
             res.status(status).send(message);
         }
     })
@@ -63,7 +66,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.remove(req.params.libraryId));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.remove()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.remove()");
             res.status(status).send(message);
         }
     })
@@ -73,7 +77,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.find(req.params.libraryId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.find()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.find()");
             res.status(status).send(message);
         }
     })
@@ -83,7 +88,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.update(req.params.libraryId, req.body));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.update()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.update()");
             res.status(status).send(message);
         }
     })
@@ -97,7 +103,8 @@ module.exports = (app) => {
         try {
             res.send(await LibraryServices.authorAll(req.params.libraryId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.authorAll()");
             res.status(status).send(message);
         }
     })
@@ -109,7 +116,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.authorExact
                 (req.params.libraryId, req.params.firstName, req.params.lastName, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.authorExact()");
             res.status(status).send(message);
         }
     })
@@ -121,7 +129,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.authorName
                     (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.authorName()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.authorName()");
             res.status(status).send(message);
         }
     })
@@ -134,7 +143,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.seriesAll
                 (req.params.libraryId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.seriesAll()");
             res.status(status).send(message);
         }
     })
@@ -145,7 +155,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.seriesExact
                 (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.seriesExact()");
             res.status(status).send(message);
         }
     })
@@ -156,7 +167,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.seriesName
             (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.seriesName()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.seriesName()");
             res.status(status).send(message);
         }
     })
@@ -169,7 +181,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.storyAll
             (req.params.libraryId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.storiesAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.storiesAll()");
             res.status(status).send(message);
         }
     })
@@ -180,7 +193,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.storyExact
             (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.storiesExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.storiesExact()");
             res.status(status).send(message);
         }
     })
@@ -191,7 +205,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.storyName
             (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesName()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.volumesName()");
             res.status(status).send(message);
         }
     })
@@ -204,7 +219,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.volumeAll
             (req.params.libraryId, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesAll()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.volumesAll()");
             res.status(status).send(message);
         }
     })
@@ -215,7 +231,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.volumeExact
             (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesExact()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.volumesExact()");
             res.status(status).send(message);
         }
     })
@@ -226,7 +243,8 @@ module.exports = (app) => {
             res.send(await LibraryServices.volumeName
             (req.params.libraryId, req.params.name, req.query));
         } catch (err) {
-            let [status, message] = FormatErrorResponse(err, "LibraryRouters.volumesName()");
+            let [status, message] =
+                FormatErrorResponse(err, "LibraryRouters.volumesName()");
             res.status(status).send(message);
         }
     })

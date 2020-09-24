@@ -34,18 +34,13 @@ describe("LibraryServices Children Tests", () => {
 
     // Test Hooks ------------------------------------------------------------
 
-    before("#init", async () => {
-        await Library.sync({
-            force: true
-        });
+    beforeEach("#beforeEach()", async () => {
+        await db.sequelize.sync({
+            force: true,
+            truncate: true,
+        })
     });
 
-    beforeEach("#erase", async () => {
-        await Library.destroy({
-            cascade: true,
-            truncate: true
-        });
-    });
 
     // Test Methods ----------------------------------------------------------
 
