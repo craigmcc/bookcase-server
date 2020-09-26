@@ -9,9 +9,11 @@ const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
 const {
-    librariesData0, librariesData1, loadLibraries,
-    storiesData0, storiesData1, loadStories,
-    volumesData0, volumesData1, loadVolumes,
+    librariesData0, librariesData1,
+    storiesData0, storiesData1,
+    volumesData0, volumesData1,
+    loadLibraries, loadLibrariesStories, loadLibrariesVolumes,
+    loadStoriesVolumes,
 } = require("../util/SeedData");
 
 const {
@@ -47,11 +49,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should fail with duplicate volumeId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 0,
+                    storiesData0, 1,
+                    volumesData0, 2);
                 let volumeMatch0 = volumes[0].dataValues;
                 let volumeMatch1 = volumes[0].dataValues; // Duplicate
 
@@ -74,10 +78,11 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should fail with invalid volumeId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 0,
+                    storiesData0, 1);
                 let invalidVolumeId = 9999;
 
                 try {
@@ -97,10 +102,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should fail with invalid storyId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
-                let volumeMatch = volumes[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 2,
+                    storiesData0, 1,
+                    volumesData0, 0);
                 let invalidStoryId = 9999;
 
                 try {
@@ -119,38 +127,46 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should fail with mismatched libraryId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch0 = libraries[0].dataValues;
-                let libraryMatch1 = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch0, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch1, volumesData1);
-                let volumeMatch = volumes[0].dataValues;
+                let [
+                    libraries0, libraryMatch0,
+                    stories0, storyMatch0,
+                    volumes0, volumeMatch0,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 1,
+                    volumesData0, 1);
+                let [
+                    libraries1, libraryMatch1,
+                    stories1, storyMatch1,
+                    volumes1, volumeMatch1,
+                ] = await loadStoriesVolumes(librariesData1, 0,
+                    storiesData1, 0,
+                    volumesData1, 0);
 
                 try {
                     await StoryServices.volumeAdd
-                        (storyMatch.id, volumeMatch.id);
+                        (storyMatch0.id, volumeMatch1.id);
                     expect.fail("Should have thrown BadRequest");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
                         expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`libraryId: Story ${storyMatch.id} belongs to ` +
-                            `Library ${storyMatch.libraryId} but Volume ${volumeMatch.id} ` +
-                            `belongs to Library ${volumeMatch.libraryId}`);
+                        .includes(`libraryId: Story ${storyMatch0.id} belongs to ` +
+                            `Library ${storyMatch0.libraryId} but Volume ${volumeMatch1.id} ` +
+                            `belongs to Library ${volumeMatch1.libraryId}`);
                 }
 
             });
 
             it("should succeed with one volume", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[0].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
-                let volumeMatch = volumes[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 2,
+                    volumesData0, 0);
 
                 try {
                     await StoryServices.volumeAdd
@@ -171,11 +187,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should succeed with two volumes", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 0,
+                    volumesData0, 2);
                 let volumeMatch0 = volumes[0].dataValues;
                 let volumeMatch1 = volumes[1].dataValues;
 
@@ -207,11 +225,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should succeed finding all objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 2,
+                    volumesData0, 0);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[0].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[1].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[2].id);
@@ -241,10 +261,11 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should succeed finding no objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                    storiesData0, 1);
 
                 try {
                     let results = await StoryServices.volumeAll(storyMatch.id);
@@ -265,15 +286,16 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should find all matches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 0,
+                    volumesData0, 1);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[0].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[1].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[2].id);
-                let volumeMatch = volumes[1];
 
                 try {
                     let result = await StoryServices.volumeExact
@@ -288,11 +310,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it ("should find no mismatches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 2,
+                    storiesData0, 1,
+                    volumesData0, 2);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[0].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[1].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[2].id);
@@ -330,11 +354,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should fail on invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 0,
+                    storiesData0, 1,
+                    volumesData0, 2);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[0].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[1].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[2].id);
@@ -356,11 +382,13 @@ describe("StoryServices Volume Children Tests", () => {
 
             it("should succeed on valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let volumes = await loadVolumes(libraryMatch, volumesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    volumes, volumeMatch,
+                ] = await loadStoriesVolumes(librariesData0, 1,
+                    storiesData0, 2,
+                    volumesData0, 0);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[0].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[1].id);
                 await StoryServices.volumeAdd(storyMatch.id, volumes[2].id);

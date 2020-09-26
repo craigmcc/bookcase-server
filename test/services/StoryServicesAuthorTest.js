@@ -9,13 +9,15 @@ const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
 const {
-    authorsData0, authorsData1, loadAuthors,
-    librariesData0, librariesData1, loadLibraries,
-    storiesData0, storiesData1, loadStories,
+    authorsData0, authorsData1,
+    librariesData0, librariesData1,
+    storiesData0, storiesData1,
+    loadLibraries, loadLibrariesAuthors, loadLibrariesStories,
+    loadStoriesAuthors,
 } = require("../util/SeedData");
 
 const {
-    authorKey
+    authorKey,
 } = require("../util/SortKeys");
 
 // External Modules ----------------------------------------------------------
@@ -47,11 +49,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should fail with duplicate authorId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 0,
+                        storiesData0, 2,
+                        authorsData0, 1);
                 let authorMatch0 = authors[0].dataValues;
                 let authorMatch1 = authors[0].dataValues; // Duplicate
 
@@ -74,10 +78,11 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should fail with invalid authorId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 0,
+                    storiesData0, 2);
                 let invalidAuthorId = 9999;
 
                 try {
@@ -97,10 +102,11 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should fail with invalid storyId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch,
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                    authorsData0, 0);
                 let invalidStoryId = 9999;
 
                 try {
@@ -119,38 +125,46 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should fail with mismatched libraryId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch0 = libraries[0].dataValues;
-                let libraryMatch1 = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch0, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch1, authorsData1);
-                let authorMatch = authors[0].dataValues;
+                let [
+                    libraries0, libraryMatch0,
+                    stories0, storyMatch0,
+                    authors0, authorMatch0,
+                ] = await loadStoriesAuthors(librariesData0, 0,
+                    storiesData0, 1,
+                    authorsData0, 2);
+                let [
+                    libraries1, libraryMatch1,
+                    stories1, storyMatch1,
+                    authors1, authorMatch1,
+                ] = await loadStoriesAuthors(librariesData1, 2,
+                    storiesData1, 1,
+                    authorsData1, 0);
 
                 try {
                     await StoryServices.authorAdd
-                        (storyMatch.id, authorMatch.id);
+                        (storyMatch0.id, authorMatch1.id);
                     expect.fail("Should have thrown BadRequest");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
                         expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`libraryId: Story ${storyMatch.id} belongs to ` +
-                            `Library ${storyMatch.libraryId} but Author ${authorMatch.id} ` +
-                            `belongs to Library ${authorMatch.libraryId}`);
+                        .includes(`libraryId: Story ${storyMatch0.id} belongs to ` +
+                            `Library ${storyMatch0.libraryId} but Author ${authorMatch1.id} ` +
+                            `belongs to Library ${authorMatch1.libraryId}`);
                 }
 
             });
 
             it("should succeed with one author", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 1,
+                    storiesData0, 0,
+                    authorsData0, 1);
 
                 try {
                     await StoryServices.authorAdd
@@ -171,11 +185,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should succeed with two authors", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 1,
+                    storiesData0, 0,
+                    authorsData0, 1);
                 let authorMatch0 = authors[0].dataValues;
                 let authorMatch1 = authors[1].dataValues;
 
@@ -183,7 +199,7 @@ describe("StoryServices Author Children Tests", () => {
                     await StoryServices.authorAdd
                         (storyMatch.id, authorMatch0.id);
                     await StoryServices.authorAdd
-                    (storyMatch.id, authorMatch1.id);
+                        (storyMatch.id, authorMatch1.id);
                     let updated = await StoryServices.find(storyMatch.id, {
                         withAuthors: ""
                     });
@@ -207,11 +223,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should succeed finding all objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 2,
+                    storiesData0, 2,
+                    authorsData0, 2);
                 await StoryServices.authorAdd(storyMatch.id, authors[0].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[1].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[2].id);
@@ -241,10 +259,11 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should succeed finding no objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                    storiesData0, 1);
 
                 try {
                     let results = await StoryServices.authorAll(storyMatch.id);
@@ -265,15 +284,16 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should find all matches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 0,
+                    storiesData0, 0,
+                    authorsData0, 0);
                 await StoryServices.authorAdd(storyMatch.id, authors[0].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[1].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[2].id);
-                let authorMatch = authors[1];
 
                 try {
                     let result = await StoryServices.authorExact
@@ -290,11 +310,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it ("should find no mismatches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 0,
+                    storiesData0, 1,
+                    authorsData0, 2);
                 await StoryServices.authorAdd(storyMatch.id, authors[0].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[1].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[2].id);
@@ -333,11 +355,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should fail on invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 1,
+                    storiesData0, 2,
+                    authorsData0, 0);
                 await StoryServices.authorAdd(storyMatch.id, authors[0].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[1].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[2].id);
@@ -359,11 +383,13 @@ describe("StoryServices Author Children Tests", () => {
 
             it("should succeed on valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 2,
+                    storiesData0, 0,
+                    authorsData0, 1);
                 await StoryServices.authorAdd(storyMatch.id, authors[0].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[1].id);
                 await StoryServices.authorAdd(storyMatch.id, authors[2].id);

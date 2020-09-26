@@ -10,9 +10,8 @@ const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
 const {
-    authorsData0, authorsData1, loadAuthors,
-    librariesData0, librariesData1, loadLibraries,
-    storiesData0, storiesData1, loadStories,
+    authorsData0, librariesData0, storiesData0,
+    loadLibraries, loadLibrariesStories, loadStoriesAuthors,
 } = require("../util/SeedData");
 
 const {
@@ -45,9 +44,11 @@ describe("StoryServices Tests", () => {
 
             it("should find all objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 0,
+                        storiesData0, 0);
 
                 let results = await StoryServices.all();
                 expect(results.length).to.equal(3);
@@ -66,9 +67,11 @@ describe("StoryServices Tests", () => {
 
             it("should find all objects with includes", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                        storiesData0, 1);
 
                 let results = await StoryServices.all({
                     withLibrary: ""
@@ -94,9 +97,11 @@ describe("StoryServices Tests", () => {
 
             it("should find some objects with pagination", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                        storiesData0, 2);
 
                 let results = await StoryServices.all({
                     offset: 1
@@ -126,10 +131,11 @@ describe("StoryServices Tests", () => {
 
             it("should find exact on matches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                        storiesData0, 1);
 
                 try {
                     let result = await StoryServices.exact(storyMatch.name);
@@ -143,9 +149,11 @@ describe("StoryServices Tests", () => {
 
             it("should find none on mismatches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                        storiesData0, 0);
                 let invalidName = "Invalid Name Match";
 
                 try {
@@ -171,9 +179,11 @@ describe("StoryServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                        storiesData0, 1);
                 let invalidId = 9999;
 
                 try {
@@ -191,10 +201,11 @@ describe("StoryServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 0,
+                        storiesData0, 2);
 
                 try {
                     let result = await StoryServices.find(storyMatch.id);
@@ -207,13 +218,15 @@ describe("StoryServices Tests", () => {
 
             it("should succeed with valid id and nested authors", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                    authors, authorMatch,
+                ] = await loadStoriesAuthors(librariesData0, 1,
+                        storiesData0, 0,
+                        authorsData0, 2);
                 let authorMatch0 = authors[0].dataValues;
                 let authorMatch1 = authors[1].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
 
                 try {
                     await StoryServices.authorAdd(storyMatch.id, authorMatch0.id);
@@ -243,10 +256,11 @@ describe("StoryServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[0].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                        storiesData0, 0);
                 let storyDup = stories[1].dataValues;
                 let duplicateNameStory = {
                     ...storyMatch,
@@ -386,10 +400,11 @@ describe("StoryServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[0].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                    storiesData0, 0);
 
                 try {
                     let result = await StoryServices.remove(storyMatch.id);
@@ -413,10 +428,11 @@ describe("StoryServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[0].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                        storiesData0, 0);
                 let storyDup = stories[1].dataValues;
                 let invalidData = {
                     ...storyMatch,
@@ -439,10 +455,11 @@ describe("StoryServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 2,
+                        storiesData0, 2);
                 let invalidId = 9999;
                 let invalidData = {
                     ...storyMatch,
@@ -468,10 +485,11 @@ describe("StoryServices Tests", () => {
 
             it("should succeed with no change", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 1,
+                        storiesData0, 1);
                 let validData = {
                     ...storyMatch
                 }
@@ -489,10 +507,11 @@ describe("StoryServices Tests", () => {
 
             it("should succeed with other field change", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    stories, storyMatch,
+                ] = await loadLibrariesStories(librariesData0, 0,
+                        storiesData0, 0);
                 let validData = {
                     ...storyMatch,
                     notes: "Brand New Notes"

@@ -260,3 +260,136 @@ module.exports.loadVolumes = async (library, data) => {
         throw err;
     }
 }
+
+// Double Data Seeders -------------------------------------------------------
+
+module.exports.loadLibrariesAuthors = async (librariesData, libraryIndex,
+                                             authorsData, authorIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let authors = await this.loadAuthors(libraryMatch, authorsData);
+    let authorMatch = authors[authorIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        authors, authorMatch,
+    ];
+}
+
+module.exports.loadLibrariesSeries = async (librariesData, libraryIndex,
+                                            seriesData, seriesIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let series = await this.loadSeries(libraryMatch, seriesData);
+    let seriesMatch = series[seriesIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        series, seriesMatch,
+    ];
+}
+
+module.exports.loadLibrariesStories = async (librariesData, libraryIndex,
+                                             storiesData, storyIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let stories = await this.loadStories(libraryMatch, storiesData);
+    let storyMatch = stories[storyIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        stories, storyMatch,
+    ];
+}
+
+module.exports.loadLibrariesVolumes = async (librariesData, libraryIndex,
+                                             volumesData, volumeIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let volumes = await this.loadVolumes(libraryMatch, volumesData);
+    let volumeMatch = volumes[volumeIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        volumes, volumeMatch,
+    ];
+}
+
+// Triple Data Seeders -------------------------------------------------------
+
+module.exports.loadSeriesAuthors = async (librariesData, libraryIndex,
+                                          seriesData, seriesIndex,
+                                          authorsData, authorIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let series = await this.loadSeries(libraryMatch, seriesData);
+    let seriesMatch = series[seriesIndex].dataValues;
+    let authors = await this.loadAuthors(libraryMatch, authorsData);
+    let authorMatch = authors[authorIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        series, seriesMatch,
+        authors, authorMatch
+    ];
+}
+
+module.exports.loadSeriesStories = async (librariesData, libraryIndex,
+                                          seriesData, seriesIndex,
+                                          storiesData, storyIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let series = await this.loadSeries(libraryMatch, seriesData);
+    let seriesMatch = series[seriesIndex].dataValues;
+    let stories = await this.loadStories(libraryMatch, storiesData);
+    let storyMatch = stories[storyIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        series, seriesMatch,
+        stories, storyMatch
+    ];
+}
+
+module.exports.loadStoriesAuthors = async (librariesData, libraryIndex,
+                                           storiesData, storyIndex,
+                                           authorsData, authorIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let stories = await this.loadStories(libraryMatch, storiesData);
+    let storyMatch = stories[storyIndex].dataValues;
+    let authors = await this.loadAuthors(libraryMatch, authorsData);
+    let authorMatch = authors[authorIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        stories, storyMatch,
+        authors, authorMatch
+    ];
+}
+
+module.exports.loadStoriesSeries = async (librariesData, libraryIndex,
+                                          storiesData, storyIndex,
+                                          seriesData, seriesIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let stories = await this.loadStories(libraryMatch, storiesData);
+    let storyMatch = stories[storyIndex].dataValues;
+    let series = await this.loadSeries(libraryMatch, seriesData);
+    let seriesMatch = series[seriesIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        stories, storyMatch,
+        series, seriesMatch
+    ];
+}
+
+module.exports.loadStoriesVolumes = async (librariesData, libraryIndex,
+                                           storiesData, storyIndex,
+                                           volumesData, volumeIndex) => {
+    let libraries = await this.loadLibraries(librariesData);
+    let libraryMatch = libraries[libraryIndex].dataValues;
+    let stories = await this.loadStories(libraryMatch, storiesData);
+    let storyMatch = stories[storyIndex].dataValues;
+    let volumes = await this.loadVolumes(libraryMatch, volumesData);
+    let volumeMatch = volumes[volumeIndex].dataValues;
+    return [
+        libraries, libraryMatch,
+        stories, storyMatch,
+        volumes, volumeMatch
+    ];
+}
+

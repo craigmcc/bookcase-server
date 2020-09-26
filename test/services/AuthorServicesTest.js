@@ -5,19 +5,17 @@
 const db = require("../../src/models");
 const Author = db.Author;
 const AuthorServices = require("../../src/services/AuthorServices");
-const Library = db.Library;
+
 const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
 const {
-    authorsData0, authorsData1, loadAuthors,
-    librariesData0, librariesData1, loadLibraries,
-    storiesData0, storiesData1, loadStories,
-    volumesData0, volumesData1, loadVolumes,
+    authorsData0, librariesData0,
+    loadLibraries, loadLibrariesAuthors,
 } = require("../util/SeedData");
 
 const {
-    authorKey, libraryKey
+    authorKey
 } = require("../util/SortKeys");
 
 // External Modules ----------------------------------------------------------
@@ -46,9 +44,11 @@ describe("AuthorServices Tests", () => {
 
             it("should find all objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch,
+                ] = await loadLibrariesAuthors(librariesData0, 0,
+                        authorsData0, 0);
 
                 try {
                     let results = await AuthorServices.all();
@@ -71,9 +71,11 @@ describe("AuthorServices Tests", () => {
 
             it("should find all objects with includes", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
 
                 try {
                     let results = await AuthorServices.all({
@@ -95,9 +97,11 @@ describe("AuthorServices Tests", () => {
 
             it("should find some objects with pagination", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 2,
+                    authorsData0, 1);
 
                 try {
                     let results = await AuthorServices.all({
@@ -129,14 +133,69 @@ describe("AuthorServices Tests", () => {
 
     });
 
+    describe("#exact()", () => {
+
+        context("all objects", () => {
+
+            it("should find exact on matches", async () => {
+
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 0,
+                        authorsData0, 2);
+
+                try {
+                    let result = await AuthorServices.exact
+                        (authorMatch.firstName, authorMatch.lastName);
+                    expect(result.id).to.equal(authorMatch.id);
+                    expect(result.firstName).to.equal(authorMatch.firstName);
+                    expect(result.lastName).to.equal(authorMatch.lastName);
+                } catch (err) {
+                    expect.fail(`Should not have thrown '${err.message}'`);
+                }
+
+            });
+
+            it("should find none on mismatches", async () => {
+
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                    authorsData0, 1);
+                let invalidFirstName = "Invalid First Name Match";
+                let invalidLastName = "Invalid Last Name Match";
+
+                try {
+                    let result = await AuthorServices.exact
+                        (invalidFirstName, invalidLastName);
+                    expect.fail(`Should have thrown NotFound`);
+                } catch (err) {
+                    if (!(err instanceof NotFound)) {
+                        expect.fail(`Should have thrown typeof NotFound for '${err.message}'`);
+                    }
+                    expect(err.message)
+                        .includes(`name: Missing Author '${invalidFirstName} ${invalidLastName}'`);
+                }
+
+            });
+
+        });
+
+    });
+
     describe("#find()", () => {
 
         context("all objects", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let authors = await loadAuthors(libraries[0], authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 1);
                 let invalidId = 9999;
 
                 try {
@@ -154,10 +213,11 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                    authorsData0, 2);
 
                 try {
                     let result = await AuthorServices.find(authorMatch.id);
@@ -178,9 +238,11 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 2,
+                        authorsData0, 1);
                 let duplicateNameAuthor = {
                     ...authors[0].dataValues,
                     firstName: authors[1].firstName,
@@ -267,7 +329,6 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with missing libraryId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
                 let invalidAuthor = {
                     ...authorsData0[0],
                     libraryId: null
@@ -292,10 +353,13 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid arguments", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
                 let validAuthor = {
-                    ...authorsData0[2],
+                    ...authorMatch,
                     firstName: "Sister",
                     libraryId: libraryMatch.id
                 }
@@ -311,6 +375,12 @@ describe("AuthorServices Tests", () => {
             });
 
         });
+
+    });
+
+    describe("#name()", () => {
+
+        // WARNING:  sqlite3 does not understand ilike operator so we cannot test
 
     });
 
@@ -337,10 +407,11 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
-                let authorMatch = authors[0].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
 
                 try {
                     let result = await AuthorServices.remove(authorMatch.id);
@@ -365,9 +436,11 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with duplicate name", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
                 let invalidData = {
                     ...authors[0].dataValues,
                     firstName: authors[1].dataValues.firstName,
@@ -390,9 +463,11 @@ describe("AuthorServices Tests", () => {
 
             it("should fail with invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
                 let invalidId = 9999;
                 let invalidData = {
                     ...authors[2].dataValues,
@@ -418,9 +493,11 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with no change", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[1].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 1,
+                        authorsData0, 0);
                 let validData = {
                     ...authors[1].dataValues
                 }
@@ -439,9 +516,11 @@ describe("AuthorServices Tests", () => {
 
             it("should succeed with other field change", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let authors = await loadAuthors(libraryMatch, authorsData0);
+                let [
+                    libraries, libraryMatch,
+                    authors, authorMatch
+                ] = await loadLibrariesAuthors(librariesData0, 2,
+                        authorsData0, 0);
                 let validData = {
                     ...authors[2].dataValues,
                     notes: "Brand New Notes"
