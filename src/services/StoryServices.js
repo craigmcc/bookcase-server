@@ -64,6 +64,9 @@ let appendQueryParameters = (options, queryParameters) => {
     if ("" === queryParameters["withLibrary"]) {
         include.push(Library);
     }
+    if ("" === queryParameters["withSeries"]) {
+        include.push(Series);
+    }
     if ("" === queryParameters["withVolumes"]) {
         include.push(Volume);
     }
@@ -89,7 +92,7 @@ exports.find = async (storyId, queryParameters) => {
     let options = appendQueryParameters({}, queryParameters);
     let result = await Story.findByPk(storyId, options);
     if (!result) {
-        throw new NotFound(`id: Missing Story ${storyId}`);
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
     } else {
         return result;
     }
@@ -120,13 +123,13 @@ exports.insert = async (data) => {
 exports.remove = async (storyId) => {
     let result = await Story.findByPk(storyId);
     if (!result) {
-        throw new NotFound(`id: Missing Story ${storyId}`);
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
     }
     let num = await Story.destroy({
         where: { id: storyId }
     });
     if (num !== 1) {
-        throw new NotFound(`id: Cannot remove Story ${storyId}`);
+        throw new NotFound(`storyId: Cannot remove Story ${storyId}`);
     }
     return result;
 }
@@ -134,7 +137,7 @@ exports.remove = async (storyId) => {
 exports.update = async (storyId, data) => {
     let original = await Story.findByPk(storyId);
     if (!original) {
-        throw new NotFound(`id: Missing Story ${storyId}`);
+        throw new NotFound(`storyId: Missing Story ${storyId}`);
     }
     let transaction;
     try {
@@ -145,7 +148,7 @@ exports.update = async (storyId, data) => {
             where: { id: storyId }
         });
         if (result[0] === 0) {
-            throw new BadRequest(`id: Cannot update Story ${storyId}`);
+            throw new BadRequest(`storyId: Cannot update Story ${storyId}`);
         }
         await transaction.commit();
         transaction = null;
@@ -352,7 +355,7 @@ exports.seriesExact = async (storyId, name, queryParameters) => {
     }, queryParameters);
     let results = await story.getSeries(options);
     if (results.length !== 1) {
-        throw new NotFound(`name: Missing Series '${firstName} ${lastName}'`);
+        throw new NotFound(`name: Missing Series '${name}'`);
     }
     return results[0];
 }

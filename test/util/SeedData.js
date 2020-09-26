@@ -187,7 +187,7 @@ module.exports.volumesData1 = [
     }
 ]
 
-// Data Seeders --------------------------------------------------------------
+// Single Data Seeders -------------------------------------------------------
 
 // Returns array of created Author objects
 module.exports.loadAuthors = async (library, data) => {
