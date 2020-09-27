@@ -12,9 +12,10 @@ const BadRequest = require("../../src/util/BadRequest");
 const NotFound = require("../../src/util/NotFound");
 
 const {
-    librariesData0, librariesData1, loadLibraries,
-    seriesData0, seriesData1, loadSeries,
-    storiesData0, storiesData1, loadStories,
+    librariesData0, librariesData1,
+    seriesData0, seriesData1,
+    storiesData0, storiesData1,
+    loadLibraries, loadLibrariesSeries, loadSeriesStories
 } = require("../util/SeedData");
 
 const {
@@ -50,11 +51,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should fail with duplicate storyId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 let storyMatch0 = stories[0].dataValues;
                 let storyMatch1 = stories[0].dataValues; // Duplicate
 
@@ -77,10 +80,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should fail with invalid storyId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 let invalidStoryId = 9999;
 
                 try {
@@ -100,10 +106,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should fail with invalid seriesId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 let invalidSeriesId = 9999;
 
                 try {
@@ -122,38 +131,46 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should fail with mismatched libraryId", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch0 = libraries[0].dataValues;
-                let libraryMatch1 = libraries[1].dataValues;
-                let series = await loadSeries(libraryMatch0, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch1, storiesData1);
-                let storyMatch = stories[0].dataValues;
+                let [
+                    libraries0, libraryMatch0,
+                    series0, seriesMatch0,
+                    stories0, storyMatch0,
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
+                let [
+                    libraries1, libraryMatch1,
+                    series1, seriesMatch1,
+                    stories1, storyMatch1
+                ] = await loadSeriesStories(librariesData1, 2,
+                    seriesData1, 1,
+                    storiesData1, 0);
 
                 try {
                     await SeriesServices.storyAdd
-                        (seriesMatch.id, storyMatch.id);
+                        (seriesMatch0.id, storyMatch1.id);
                     expect.fail("Should have thrown BadRequest");
                 } catch (err) {
                     if (!(err instanceof BadRequest)) {
                         expect.fail(`Should have thrown typeof BadRequest for '${err.message}'`);
                     }
                     expect(err.message)
-                        .includes(`libraryId: Series ${seriesMatch.id} belongs to ` +
-                            `Library ${seriesMatch.libraryId} but Story ${storyMatch.id} ` +
-                            `belongs to Library ${storyMatch.libraryId}`);
+                        .includes(`libraryId: Series ${seriesMatch0.id} belongs to ` +
+                            `Library ${seriesMatch0.libraryId} but Story ${storyMatch1.id} ` +
+                            `belongs to Library ${storyMatch1.libraryId}`);
                 }
 
             });
 
             it("should succeed with one story", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[0].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
-                let storyMatch = stories[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
 
                 try {
                     await SeriesServices.storyAdd
@@ -174,11 +191,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should succeed with two stories", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[0].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 let storyMatch0 = stories[0].dataValues;
                 let storyMatch1 = stories[1].dataValues;
 
@@ -210,11 +229,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should succeed finding all objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[0].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[1].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[2].id);
@@ -245,10 +266,11 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should succeed finding no objects", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[1].dataValues;
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                ] = await loadLibrariesSeries(librariesData0, 2,
+                    seriesData0, 1);
 
                 try {
                     let results = await SeriesServices.storyAll
@@ -270,15 +292,16 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should find all matches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[0].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[1].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[2].id);
-                let storyMatch = stories[1];
 
                 try {
                     let result = await SeriesServices.storyExact
@@ -293,11 +316,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it ("should find no mismatches", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[0].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[1].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[2].id);
@@ -325,18 +350,6 @@ describe("SeriesServices Story Children Tests", () => {
     /*
         describe("#storyName()", () => {
 
-            context("all objects", () => {
-
-                it("should find all matches", async () => {
-
-                });
-
-                it("should find no mismatches", async () => {
-
-                });
-
-            });
-
         });
     */
 
@@ -348,11 +361,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should fail on invalid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[0].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[1].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[2].id);
@@ -375,11 +390,13 @@ describe("SeriesServices Story Children Tests", () => {
 
             it("should succeed on valid id", async () => {
 
-                let libraries = await loadLibraries(librariesData0);
-                let libraryMatch = libraries[2].dataValues;
-                let series = await loadSeries(libraryMatch, seriesData0);
-                let seriesMatch = series[2].dataValues;
-                let stories = await loadStories(libraryMatch, storiesData0);
+                let [
+                    libraries, libraryMatch,
+                    series, seriesMatch,
+                    stories, storyMatch
+                ] = await loadSeriesStories(librariesData0, 2,
+                    seriesData0, 1,
+                    storiesData0, 0);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[0].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[1].id);
                 await SeriesServices.storyAdd(seriesMatch.id, stories[2].id);
